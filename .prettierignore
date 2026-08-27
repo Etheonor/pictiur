@@ -7,3 +7,7 @@ bun.lockb
 
 # Miscellaneous
 /static/
+
+# Planning artifacts (not part of the repo)
+IMPLEMENTATION.md
+PLAN.md

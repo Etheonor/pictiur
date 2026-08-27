@@ -1,4 +1,4 @@
-import { loadSettings, sanitizeSettings, saveSettings, type Settings } from './settings';
+import { loadSettings, sanitizeSettings, type Settings } from './settings';
 
 export {
 	ALLOWED_FORMATS,

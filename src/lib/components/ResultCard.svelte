@@ -30,7 +30,10 @@
 	</div>
 
 	<div class="actions">
-		<button type="button" onclick={() => (compare = !compare)}>{t(settings.lang, 'result.compare')}</button>
+		<button type="button" onclick={() => (compare = !compare)}
+			>{t(settings.lang, 'result.compare')}</button
+		>
+		<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 		<a href={result.url} download={filename}>{t(settings.lang, 'result.download')}</a>
 	</div>
 </article>

@@ -6,7 +6,7 @@
 	import ResultCard from '$lib/components/ResultCard.svelte';
 	import { listCodecs } from '$lib/codecs';
 	import { JobQueueController, type QueueJob } from '$lib/queue/controller';
-	import { settings, updateSettings, type Settings } from '$lib/stores/settings.svelte';
+	import { settings, updateSettings } from '$lib/stores/settings.svelte';
 	import { saveSettings } from '$lib/stores/settings';
 	import { filesFromList, toPipelineOptions, type InputFile } from '$lib/utils/files';
 	import { buildZip } from '$lib/utils/zip';
@@ -106,7 +106,7 @@
 
 	{#if errors.length}
 		<ul class="errors">
-			{#each errors as error}
+			{#each errors as error (error)}
 				<li>{error}</li>
 			{/each}
 		</ul>
@@ -127,7 +127,7 @@
 				{#if jobs.length === 0}
 					<li class="empty">{t(settings.lang, 'queue.empty')}</li>
 				{:else}
-					{#each jobs as job}
+					{#each jobs as job (job.id)}
 						{#if job.status === 'done' && job.result}
 							<ResultCard {job} inputUrl={inputUrls.get(job.name) ?? ''} />
 						{:else}

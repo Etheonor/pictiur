@@ -1,11 +1,10 @@
 <script lang="ts">
-	let { beforeUrl, afterUrl, alt }: { beforeUrl: string; afterUrl: string; alt: string } =
-		$props();
+	let { beforeUrl, afterUrl, alt }: { beforeUrl: string; afterUrl: string; alt: string } = $props();
 	let pos = $state(50);
 </script>
 
 <div class="compare">
-	<img src={afterUrl} alt={alt} class="after" />
+	<img src={afterUrl} {alt} class="after" />
 	<div class="before-wrap" style={`clip-path: inset(0 ${100 - pos}% 0 0);`}>
 		<img src={beforeUrl} alt={`${alt} (before)`} class="before" />
 	</div>

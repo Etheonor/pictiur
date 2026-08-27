@@ -91,7 +91,10 @@
 
 	<label class="row">
 		<span>{t(settings.lang, 'settings.fit')}</span>
-		<select value={settings.fit} onchange={(e) => updateSettings({ fit: e.currentTarget.value as never })}>
+		<select
+			value={settings.fit}
+			onchange={(e) => updateSettings({ fit: e.currentTarget.value as never })}
+		>
 			<option value="contain">{t(settings.lang, 'fit.contain')}</option>
 			<option value="cover">{t(settings.lang, 'fit.cover')}</option>
 			<option value="fill">{t(settings.lang, 'fit.fill')}</option>

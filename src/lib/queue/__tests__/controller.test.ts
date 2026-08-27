@@ -5,14 +5,21 @@ import type { PoolResult } from '../../workers/pool';
 class FakePool {
 	submitted: { id: string; options: unknown; signal?: AbortSignal }[] = [];
 	private readonly delay: number;
-	constructor(delay = 0, private fail = false) {
+	constructor(
+		delay = 0,
+		private fail = false
+	) {
 		this.delay = delay;
 	}
 	submit(args: {
 		payload: { id: string; options: unknown };
 		signal?: AbortSignal;
 	}): Promise<PoolResult> {
-		this.submitted.push({ id: args.payload.id, options: args.payload.options, signal: args.signal });
+		this.submitted.push({
+			id: args.payload.id,
+			options: args.payload.options,
+			signal: args.signal
+		});
 		return new Promise((resolve, reject) => {
 			const { signal } = args;
 			if (signal?.aborted) {
@@ -82,9 +89,7 @@ describe('JobQueueController', () => {
 		const controller = new JobQueueController({ pool: pool as never });
 		controller.add([input('a.png'), input('b.png')]);
 		controller.abortAll();
-		await vi.waitFor(() =>
-			expect(controller.jobs.every((j) => j.status === 'aborted')).toBe(true)
-		);
+		await vi.waitFor(() => expect(controller.jobs.every((j) => j.status === 'aborted')).toBe(true));
 	});
 
 	it('clearFinished removes done jobs and revokes object urls', async () => {

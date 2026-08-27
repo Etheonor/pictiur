@@ -51,7 +51,9 @@
 		padding: 3rem 1rem;
 		text-align: center;
 		cursor: pointer;
-		transition: border-color 0.15s, background 0.15s;
+		transition:
+			border-color 0.15s,
+			background 0.15s;
 	}
 	.dropzone.active,
 	.dropzone:hover {

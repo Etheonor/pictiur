@@ -8,8 +8,8 @@
 <fieldset>
 	<legend>{t(settings.lang, 'settings.title')}</legend>
 
-	<label class="row">
-		<span>{t(settings.lang, 'settings.format')}</span>
+	<label>
+		{t(settings.lang, 'settings.format')}
 		<select
 			value={settings.targetFormat}
 			onchange={(e) => updateSettings({ targetFormat: e.currentTarget.value })}
@@ -20,33 +20,31 @@
 		</select>
 	</label>
 
-	<div class="row">
-		<span>{t(settings.lang, 'settings.compress')}</span>
-		<div class="radios">
-			<label>
-				<input
-					type="radio"
-					name="mode"
-					checked={settings.compressMode === 'quality'}
-					onchange={() => updateSettings({ compressMode: 'quality' })}
-				/>
-				{t(settings.lang, 'settings.mode.quality')}
-			</label>
-			<label>
-				<input
-					type="radio"
-					name="mode"
-					checked={settings.compressMode === 'weight'}
-					onchange={() => updateSettings({ compressMode: 'weight' })}
-				/>
-				{t(settings.lang, 'settings.mode.weight')}
-			</label>
-		</div>
-	</div>
+	<fieldset>
+		<legend>{t(settings.lang, 'settings.compress')}</legend>
+		<label>
+			<input
+				type="radio"
+				name="mode"
+				checked={settings.compressMode === 'quality'}
+				onchange={() => updateSettings({ compressMode: 'quality' })}
+			/>
+			{t(settings.lang, 'settings.mode.quality')}
+		</label>
+		<label>
+			<input
+				type="radio"
+				name="mode"
+				checked={settings.compressMode === 'weight'}
+				onchange={() => updateSettings({ compressMode: 'weight' })}
+			/>
+			{t(settings.lang, 'settings.mode.weight')}
+		</label>
+	</fieldset>
 
 	{#if settings.compressMode === 'quality'}
-		<label class="row">
-			<span>{t(settings.lang, 'settings.quality')} : {settings.quality}</span>
+		<label>
+			{t(settings.lang, 'settings.quality')} — {settings.quality}
 			<input
 				type="range"
 				min="1"
@@ -56,8 +54,8 @@
 			/>
 		</label>
 	{:else}
-		<label class="row">
-			<span>{t(settings.lang, 'settings.weightKB')}</span>
+		<label>
+			{t(settings.lang, 'settings.weightKB')}
 			<input
 				type="number"
 				min="1"
@@ -68,9 +66,9 @@
 		</label>
 	{/if}
 
-	<div class="row">
-		<span>{t(settings.lang, 'settings.dimensions')}</span>
-		<div class="inline">
+	<label>
+		{t(settings.lang, 'settings.dimensions')}
+		<span style="display:flex; gap:.5rem;">
 			<input
 				type="number"
 				min="0"
@@ -78,7 +76,6 @@
 				value={settings.maxWidth || ''}
 				onchange={(e) => updateSettings({ maxWidth: Number(e.currentTarget.value) || 0 })}
 			/>
-			<span>×</span>
 			<input
 				type="number"
 				min="0"
@@ -86,11 +83,11 @@
 				value={settings.maxHeight || ''}
 				onchange={(e) => updateSettings({ maxHeight: Number(e.currentTarget.value) || 0 })}
 			/>
-		</div>
-	</div>
+		</span>
+	</label>
 
-	<label class="row">
-		<span>{t(settings.lang, 'settings.fit')}</span>
+	<label>
+		{t(settings.lang, 'settings.fit')}
 		<select
 			value={settings.fit}
 			onchange={(e) => updateSettings({ fit: e.currentTarget.value as never })}
@@ -101,45 +98,3 @@
 		</select>
 	</label>
 </fieldset>
-
-<style>
-	fieldset {
-		border: 1px solid var(--border);
-		border-radius: 10px;
-		padding: 1rem;
-		margin: 0;
-	}
-	legend {
-		padding: 0 0.4rem;
-	}
-	.row {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: 0.6rem;
-		margin: 0.6rem 0;
-	}
-	.radios {
-		display: flex;
-		gap: 0.8rem;
-		font-size: 0.9rem;
-	}
-	.inline {
-		display: flex;
-		align-items: center;
-		gap: 0.4rem;
-	}
-	.inline input {
-		width: 64px;
-	}
-	select,
-	input[type='number'] {
-		background: var(--surface);
-		border: 1px solid var(--border);
-		border-radius: 6px;
-		padding: 0.3rem 0.5rem;
-	}
-	input[type='range'] {
-		flex: 1;
-	}
-</style>

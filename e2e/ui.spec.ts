@@ -21,11 +21,11 @@ test('drop files → results → zip download', async ({ page }) => {
 		{ name: 'logo.png', mimeType: 'image/png', buffer: TINY_PNG }
 	]);
 
-	await expect(page.locator('article.card')).toHaveCount(2, { timeout: 30_000 });
+	await expect(page.locator('article')).toHaveCount(2, { timeout: 30_000 });
 	await expect(page.getByText('−', { exact: false }).first()).toBeVisible();
 
 	// 2) chaque résultat a un lien de téléchargement
-	await expect(page.locator('article.card a[download]')).toHaveCount(2);
+	await expect(page.locator('article a[download]')).toHaveCount(2);
 
 	// 3) ZIP
 	const downloadPromise = page.waitForEvent('download');

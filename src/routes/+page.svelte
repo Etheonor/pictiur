@@ -89,44 +89,46 @@
 	});
 </script>
 
-<div class="app">
-	<header>
-		<h1>Pictiúr</h1>
-		<div class="lang">
-			<button
-				type="button"
-				onclick={() => updateSettings({ lang: settings.lang === 'fr' ? 'en' : 'fr' })}
-			>
-				{settings.lang === 'fr' ? 'EN' : 'FR'}
-			</button>
-		</div>
+<div class="container">
+	<header
+		style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;"
+	>
+		<h1 style="margin:0;">Pictiúr</h1>
+		<button
+			type="button"
+			onclick={() => updateSettings({ lang: settings.lang === 'fr' ? 'en' : 'fr' })}
+		>
+			{settings.lang === 'fr' ? 'EN' : 'FR'}
+		</button>
 	</header>
 
 	<DropZone onFiles={handleFiles} />
 
 	{#if errors.length}
-		<ul class="errors">
+		<ul>
 			{#each errors as error (error)}
 				<li>{error}</li>
 			{/each}
 		</ul>
 	{/if}
 
-	<div class="columns">
+	<div class="grid" style="margin-top:1.5rem;">
 		<aside><SettingsPanel {formats} /></aside>
 
 		<main>
 			{#if jobs.some((j) => j.status === 'done' && j.result)}
-				<button type="button" class="primary" onclick={downloadAll}>
-					{t(settings.lang, 'result.downloadAll')}
-				</button>
-				<button type="button" onclick={clearFinished}>{t(settings.lang, 'queue.clear')}</button>
+				<div style="display:flex; gap:.5rem; margin-bottom:1rem;">
+					<button type="button" class="primary" onclick={downloadAll}>
+						{t(settings.lang, 'result.downloadAll')}
+					</button>
+					<button type="button" onclick={clearFinished}>{t(settings.lang, 'queue.clear')}</button>
+				</div>
 			{/if}
 
-			<ul class="queue">
-				{#if jobs.length === 0}
-					<li class="empty">{t(settings.lang, 'queue.empty')}</li>
-				{:else}
+			{#if jobs.length === 0}
+				<small style="color: var(--pico-muted-color);">{t(settings.lang, 'queue.empty')}</small>
+			{:else}
+				<div class="grid">
 					{#each jobs as job (job.id)}
 						{#if job.status === 'done' && job.result}
 							<ResultCard {job} inputUrl={inputUrls.get(job.name) ?? ''} />
@@ -134,42 +136,8 @@
 							<QueueItem {job} />
 						{/if}
 					{/each}
-				{/if}
-			</ul>
+				</div>
+			{/if}
 		</main>
 	</div>
 </div>
-
-<style>
-	.columns {
-		display: grid;
-		grid-template-columns: 280px 1fr;
-		gap: 2rem;
-		margin-top: 1.5rem;
-	}
-	.queue {
-		list-style: none;
-		padding: 0;
-		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-		gap: 1rem;
-	}
-	.empty {
-		opacity: 0.6;
-	}
-	.errors {
-		color: var(--err);
-	}
-	.lang button {
-		background: none;
-		border: 1px solid var(--border);
-		border-radius: 6px;
-		padding: 0.3rem 0.6rem;
-		cursor: pointer;
-	}
-	@media (max-width: 800px) {
-		.columns {
-			grid-template-columns: 1fr;
-		}
-	}
-</style>

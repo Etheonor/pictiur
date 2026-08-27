@@ -3,39 +3,21 @@
 	let pos = $state(50);
 </script>
 
-<div class="compare">
-	<img src={afterUrl} {alt} class="after" />
-	<div class="before-wrap" style={`clip-path: inset(0 ${100 - pos}% 0 0);`}>
-		<img src={beforeUrl} alt={`${alt} (before)`} class="before" />
+<div style="position: relative; overflow: hidden; border-radius: 0.5rem;">
+	<img src={afterUrl} {alt} style="display:block; width:100%; height:auto;" />
+	<div style={`position:absolute; inset:0; clip-path: inset(0 ${100 - pos}% 0 0);`}>
+		<img
+			src={beforeUrl}
+			alt={`${alt} (before)`}
+			style="width:100%; height:100%; object-fit:contain;"
+		/>
 	</div>
-	<input type="range" min="0" max="100" bind:value={pos} class="slider" aria-label="compare" />
+	<input
+		type="range"
+		min="0"
+		max="100"
+		bind:value={pos}
+		style="position:absolute; inset:0; width:100%; opacity:0; cursor:ew-resize;"
+		aria-label="compare"
+	/>
 </div>
-
-<style>
-	.compare {
-		position: relative;
-		overflow: hidden;
-		border-radius: 8px;
-	}
-	.compare img {
-		display: block;
-		width: 100%;
-		height: auto;
-	}
-	.before-wrap {
-		position: absolute;
-		inset: 0;
-	}
-	.before {
-		width: 100%;
-		height: 100%;
-		object-fit: contain;
-	}
-	.slider {
-		position: absolute;
-		inset: 0;
-		width: 100%;
-		opacity: 0;
-		cursor: ew-resize;
-	}
-</style>

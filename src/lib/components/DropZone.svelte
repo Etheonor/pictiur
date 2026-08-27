@@ -20,9 +20,8 @@
 	}
 </script>
 
-<div
-	class="dropzone"
-	class:active={dragOver}
+<button
+	type="button"
 	ondragover={(e) => {
 		e.preventDefault();
 		dragOver = true;
@@ -30,45 +29,11 @@
 	ondragleave={() => (dragOver = false)}
 	ondrop={drop}
 	onclick={() => inputEl?.click()}
-	onkeydown={(e) => {
-		if (e.key === 'Enter' || e.key === ' ') {
-			e.preventDefault();
-			inputEl?.click();
-		}
-	}}
-	role="button"
-	tabindex="0"
+	style={dragOver
+		? 'border-style: dashed; border-color: var(--pico-primary-border);'
+		: 'border-style: dashed;'}
 >
-	<input type="file" accept="image/*" multiple class="hidden" bind:this={inputEl} onchange={pick} />
-	<p class="hint">{t(settings.lang, 'drop.hint')}</p>
-	<span class="browse">{t(settings.lang, 'drop.browse')}</span>
-</div>
-
-<style>
-	.dropzone {
-		border: 2px dashed var(--border);
-		border-radius: 12px;
-		padding: 3rem 1rem;
-		text-align: center;
-		cursor: pointer;
-		transition:
-			border-color 0.15s,
-			background 0.15s;
-	}
-	.dropzone.active,
-	.dropzone:hover {
-		border-color: var(--accent);
-		background: var(--surface-2);
-	}
-	.hidden {
-		display: none;
-	}
-	.hint {
-		margin: 0 0 0.5rem;
-		font-weight: 600;
-	}
-	.browse {
-		opacity: 0.7;
-		font-size: 0.9rem;
-	}
-</style>
+	<input type="file" accept="image/*" multiple hidden bind:this={inputEl} onchange={pick} />
+	<strong>{t(settings.lang, 'drop.hint')}</strong><br />
+	<small>{t(settings.lang, 'drop.browse')}</small>
+</button>

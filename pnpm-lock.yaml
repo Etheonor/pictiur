@@ -11,6 +11,9 @@ importers:
       '@jsquash/jpeg':
         specifier: ^1.6.0
         version: 1.6.0
+      '@jsquash/webp':
+        specifier: ^1.5.0
+        version: 1.5.0
     devDependencies:
       '@eslint/js':
         specifier: ^10.0.1
@@ -678,6 +681,9 @@ packages:
 
   '@jsquash/jpeg@1.6.0':
     resolution: {integrity: sha512-zwN46Awh1VM6gXlIcALwb5WzqK5H2e6+Awcs1QP8AvS8ohsK/sbE4esvmH4jhlhW7+CgiUUww66vg0aTnlSIMA==}
+
+  '@jsquash/webp@1.5.0':
+    resolution: {integrity: sha512-KggLoj2MnRSfIqTeKe1EmbljTX2vuV7mh79k89PCL1pyqiDULcPM1L47twxXt0hkb68F70bXiL31MxsuoZtKFw==}
 
   '@napi-rs/lzma-linux-x64-gnu@1.5.1':
     resolution: {integrity: sha512-oTXEIha4SsuXdTA4Iyskj0kpdx2yVXdhd75c2v3xGrHFfVMsbhTPZU/nMPL4sWKo4pBHm3aucLaqGlF696dTyQ==}
@@ -2567,6 +2573,9 @@ packages:
       jsdom:
         optional: true
 
+  wasm-feature-detect@1.9.0:
+    resolution: {integrity: sha512-zonE+xlIIYtxPy++L24ow0hAD8CICb4+FgPyROd3buyXIqsJvUEDkBgfCCoXOd1Hu3DUr0GOfnPIdcGV+YpNaA==}
+
   which-boxed-primitive@1.1.1:
     resolution: {integrity: sha512-TbX3mj8n0odCBFVlY8AxkqcHASw3L60jIuF8jFP78az3C2YhmGvqbHBpAjTRH2/xqYunrJ9g1jSyjCjpoWzIAA==}
     engines: {node: '>= 0.4'}
@@ -3422,6 +3431,10 @@ snapshots:
       '@jridgewell/sourcemap-codec': 1.5.5
 
   '@jsquash/jpeg@1.6.0': {}
+
+  '@jsquash/webp@1.5.0':
+    dependencies:
+      wasm-feature-detect: 1.9.0
 
   '@napi-rs/lzma-linux-x64-gnu@1.5.1':
     optional: true
@@ -5299,6 +5312,8 @@ snapshots:
       '@vitest/browser-playwright': 4.1.11(playwright@1.62.1)(vite@8.2.2(@types/node@24.13.3)(terser@5.51.0))(vitest@4.1.11)
     transitivePeerDependencies:
       - msw
+
+  wasm-feature-detect@1.9.0: {}
 
   which-boxed-primitive@1.1.1:
     dependencies:

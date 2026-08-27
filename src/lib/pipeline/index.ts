@@ -100,7 +100,8 @@ export async function runPipeline(
 			lossless: options.lossless,
 			progressive: options.progressive,
 			effort: options.effort,
-			onRoundStart: ensureActive
+			onRoundStart: ensureActive,
+			onProgress
 		});
 		blob = budget.blob;
 		qualityUsed = budget.quality;

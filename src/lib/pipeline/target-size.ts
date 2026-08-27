@@ -21,6 +21,8 @@ export interface BudgetParams {
 	initialQuality?: number;
 	/** Appelé avant chaque probe — sert la cancellation (T4.2). */
 	onRoundStart?: () => void;
+	/** Progression 70→95 pendant la boucle budget (pour l'UI). */
+	onProgress?: (progress: number) => void;
 }
 
 /**
@@ -66,6 +68,7 @@ export async function encodeWithinBudget(
 	const probeOnce = async (q: number): Promise<ProbeResult> => {
 		params.onRoundStart?.();
 		probes++;
+		params.onProgress?.(Math.min(94, Math.round(70 + (probes / maxIt) * 24)));
 		return probe(q);
 	};
 
@@ -106,6 +109,7 @@ export async function encodeToTarget(
 		progressive?: boolean;
 		effort?: number;
 		onRoundStart?: () => void;
+		onProgress?: (progress: number) => void;
 	}
 ): Promise<BudgetResult> {
 	const targetBytes = options.maxWeightKB * 1024;
@@ -120,6 +124,7 @@ export async function encodeToTarget(
 	};
 	return encodeWithinBudget(probe, targetBytes, {
 		initialQuality: initialQualityGuess(rgba.width * rgba.height * 4, targetBytes),
-		onRoundStart: options.onRoundStart
+		onRoundStart: options.onRoundStart,
+		onProgress: options.onProgress
 	});
 }

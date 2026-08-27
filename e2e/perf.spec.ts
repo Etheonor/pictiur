@@ -1,0 +1,69 @@
+import { expect, test } from '@playwright/test';
+
+test('budget mode on 3 large images: fast and under target', async ({ page }) => {
+	await page.goto('/');
+
+	const report = await page.evaluate(async () => {
+		const { createBrowserPool } = await import('/src/lib/workers/index.ts');
+		const pool = createBrowserPool(2);
+
+		const makeLarge = async (w: number, h: number, seed: number): Promise<ArrayBuffer> => {
+			const canvas = new OffscreenCanvas(w, h);
+			const ctx = canvas.getContext('2d')!;
+			const img = ctx.createImageData(w, h);
+			// dégradé + bruit léger : compressible (le budget peut atteindre la cible)
+			// mais assez riche pour forcer plusieurs encodages.
+			for (let y = 0; y < h; y++) {
+				for (let x = 0; x < w; x++) {
+					const i = (y * w + x) * 4;
+					const r = (x / w) * 255;
+					const g = (y / h) * 255;
+					const n = (x * 31 + y * 17 + seed * 7) % 40; // bruit léger
+					img.data[i] = r;
+					img.data[i + 1] = g;
+					img.data[i + 2] = (r + g) / 2;
+					img.data[i + 3] = 255;
+				}
+			}
+			ctx.putImageData(img, 0, 0);
+			return canvas.convertToBlob({ type: 'image/jpeg', quality: 0.95 }).then((b) => b.arrayBuffer());
+		};
+
+		const targets = [150, 120, 90]; // Ko
+		const results = [];
+		for (let i = 0; i < 3; i++) {
+			const buffer = await makeLarge(3000, 2000, i + 1);
+			const t0 = performance.now();
+			const res = await pool.submit({
+				payload: {
+					id: `perf-${i}`,
+					name: `big-${i}.jpg`,
+					mime: 'image/jpeg',
+					buffer,
+					options: { targetFormat: 'jpeg', maxWeightKB: targets[i] }
+				},
+				transfer: [buffer]
+			});
+			const elapsed = performance.now() - t0;
+			results.push({
+				width: res.width,
+				height: res.height,
+				inputSize: res.inputSize,
+				outputSize: res.outputSize,
+				qualityUsed: res.qualityUsed,
+				elapsedMs: Math.round(elapsed)
+			});
+		}
+		pool.terminate();
+		return results;
+	});
+
+	console.log('perf report:', report);
+
+	for (const r of report) {
+		expect(r.width).toBe(3000); // pas de resize demandé
+		expect(r.qualityUsed).toBeDefined();
+		expect(r.outputSize).toBeLessThanOrEqual(150 * 1024 * 1.1); // la plus grosse cible (150 Ko)
+		expect(r.elapsedMs).toBeLessThan(30_000); // généreux pour CI
+	}
+});

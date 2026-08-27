@@ -27,9 +27,10 @@ export interface PipelineResult {
 }
 
 export const LIMITS = {
-	maxDimension: 24_000, // px par côté (PLAN §8)
-	maxFileBytes: 100 * 1024 * 1024, // 100 Mo
-	stepDownThreshold: 8_000, // au-delà : resize pyramidal
+	maxDimension: 24_000,
+	maxPixels: 150_000_000, // 150 MP → ~600 Mo RGBA (plafond mémoire pic)
+	maxFileBytes: 100 * 1024 * 1024,
+	stepDownThreshold: 8_000,
 	qualityMin: 20,
 	qualityMax: 95,
 	targetIterations: 6,

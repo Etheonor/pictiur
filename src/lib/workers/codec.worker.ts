@@ -27,9 +27,12 @@ export type WorkerResponse =
 	  }
 	| { kind: 'error'; id: string; error: string };
 
+export type WorkerCommand = WorkerJob | { kind: 'cancel'; id: string };
+
 export interface WorkerHooks {
 	onProgress?: (progress: number) => void;
 	env?: PipelineEnv; // injectable pour les tests
+	shouldCancel?: () => boolean;
 }
 
 export async function handleWorkerJob(
@@ -40,7 +43,7 @@ export async function handleWorkerJob(
 		const file = new File([job.buffer], job.name ?? 'image', { type: job.mime });
 		const result = await runPipeline(
 			{ file, mime: job.mime, options: job.options },
-			{ onProgress: hooks.onProgress, ...hooks.env }
+			{ onProgress: hooks.onProgress, shouldCancel: hooks.shouldCancel, ...hooks.env }
 		);
 		const buffer = await result.blob.arrayBuffer();
 		return {
@@ -66,18 +69,27 @@ export async function handleWorkerJob(
 // --- wiring navigateur -------------------------------------------------
 // Guarded so the module can be imported in Node (Vitest) without a `self`.
 if (typeof self !== 'undefined') {
+	const cancelled = new Set<string>();
+
 	const workerSelf = self as unknown as {
-		onmessage: ((event: { data: WorkerJob }) => void) | null;
+		onmessage: ((event: { data: WorkerCommand }) => void) | null;
 		postMessage(message: WorkerResponse, transfer?: Transferable[]): void;
 	};
 
 	workerSelf.onmessage = (event) => {
-		const job = event.data;
+		const command = event.data;
+		if ('kind' in command && command.kind === 'cancel') {
+			cancelled.add(command.id);
+			return;
+		}
+		const job = command as WorkerJob;
 		void handleWorkerJob(job, {
 			onProgress: (progress) => {
 				workerSelf.postMessage({ kind: 'progress', id: job.id, progress });
-			}
+			},
+			shouldCancel: () => cancelled.has(job.id)
 		}).then((response) => {
+			cancelled.delete(job.id);
 			if (response.kind === 'result') {
 				workerSelf.postMessage(response, [response.buffer]); // transfert zéro-copie
 			} else {

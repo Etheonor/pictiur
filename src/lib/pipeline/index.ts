@@ -14,6 +14,8 @@ export interface PipelineEnv {
 	/** Résout un codec par id (défaut : registre réel). */
 	getCodec?: (id: string) => Promise<Codec | undefined>;
 	onProgress?: (progress: number) => void;
+	/** Annulation coopérative — vérifiée ENTRE les étapes LOURDES (decode/resize/encode). */
+	shouldCancel?: () => boolean;
 }
 
 /** Décode natif navigateur/worker : applique l'orientation EXIF (from-image). */
@@ -39,6 +41,9 @@ export async function runPipeline(
 	const resize = env.resize ?? resizeRgba;
 	const resolveCodec = env.getCodec ?? getCodec;
 	const onProgress = env.onProgress ?? (() => {});
+	const ensureActive = (): void => {
+		if (env.shouldCancel?.()) throw new Error('ABORTED');
+	};
 
 	const validation = validateOptions(input.options);
 	if (!validation.ok) {
@@ -53,6 +58,10 @@ export async function runPipeline(
 	if (source.width > LIMITS.maxDimension || source.height > LIMITS.maxDimension) {
 		throw new Error('MAX_DIMENSION');
 	}
+	if (source.width * source.height > LIMITS.maxPixels) {
+		throw new Error('MAX_PIXELS');
+	}
+	ensureActive();
 	const inputSize = input.file.size;
 
 	// resize (plan + pyramidal)
@@ -64,6 +73,7 @@ export async function runPipeline(
 		onProgress(45);
 		for (const step of buildResizeSteps(source, plan)) {
 			rgba = await resize(rgba, step.width, step.height);
+			ensureActive();
 			onProgress(50);
 		}
 		rgba = await resize(rgba, plan.width, plan.height);
@@ -74,6 +84,7 @@ export async function runPipeline(
 	}
 
 	// encode (simple ou budget)
+	ensureActive();
 	onProgress(65);
 	const codec = await resolveCodec(options.targetFormat);
 	if (!codec) {
@@ -88,7 +99,8 @@ export async function runPipeline(
 			quality: options.quality,
 			lossless: options.lossless,
 			progressive: options.progressive,
-			effort: options.effort
+			effort: options.effort,
+			onRoundStart: ensureActive
 		});
 		blob = budget.blob;
 		qualityUsed = budget.quality;

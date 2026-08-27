@@ -30,6 +30,7 @@ export class WorkerPool {
 	private readonly busy: boolean[];
 	private readonly queue: JobRecord[] = [];
 	private readonly inflight = new Map<string, JobRecord>();
+	private readonly assignments = new Map<string, number>();
 	private done = false;
 
 	constructor(size: number, createWorker: () => PoolWorker) {
@@ -58,7 +59,13 @@ export class WorkerPool {
 				'abort',
 				() => {
 					if (this.inflight.has(id)) {
-						this.inflight.delete(id); // le résultat arrivera, on l'ignore
+						const workerIndex = this.assignments.get(id);
+						if (workerIndex !== undefined) {
+							const worker = this.workers[workerIndex];
+							worker.postMessage({ kind: 'cancel', id });
+						}
+						this.inflight.delete(id);
+						this.assignments.delete(id);
 						reject(new Error('ABORTED'));
 					} else {
 						const queueIndex = this.queue.findIndex((j) => j.submit.payload.id === id);
@@ -83,6 +90,7 @@ export class WorkerPool {
 			const record = this.queue.shift()!;
 			this.busy[i] = true;
 			this.inflight.set(record.submit.payload.id, record);
+			this.assignments.set(record.submit.payload.id, i);
 			this.workers[i].postMessage(record.submit.payload, record.submit.transfer);
 		}
 	}
@@ -94,6 +102,7 @@ export class WorkerPool {
 		}
 		const record = this.inflight.get(response.id);
 		this.inflight.delete(response.id);
+		this.assignments.delete(response.id);
 		this.busy[index] = false;
 		if (record) {
 			if (response.kind === 'result') record.resolve(response);
@@ -108,5 +117,6 @@ export class WorkerPool {
 		for (const [, record] of this.inflight) record.reject(new Error('TERMINATED'));
 		for (const record of this.queue.splice(0)) record.reject(new Error('TERMINATED'));
 		this.inflight.clear();
+		this.assignments.clear();
 	}
 }

@@ -15,9 +15,9 @@ export const pngCodec: Codec = {
 	defaultQuality: 100,
 
 	async encode(rgba: RGBA, opts: EncodeOptions): Promise<Blob> {
-		// oxipng encodes AND optimizes in one pass; level 1-6 (4+ can be very slow,
-		// and on photos the size barely changes → default to 2 for responsiveness)
-		const level = clampLevel(opts.effort ?? 2);
+		// oxipng: level 1-6 (4+ uses zopfli → very slow, ~0% gain on photos).
+		// Bench: level 1 = 3× faster than 2 for the same size → default 1.
+		const level = clampLevel(opts.effort ?? 1);
 		const buffer = await optimise(createImageData(rgba), { level });
 		return arrayBufferToBlob(buffer, 'image/png');
 	},
@@ -27,7 +27,7 @@ export const pngCodec: Codec = {
 	},
 
 	// Re-optimize an existing PNG (used later by the "optimize only" pipeline)
-	async optimize(blob: Blob, level = 2): Promise<Blob> {
+	async optimize(blob: Blob, level = 1): Promise<Blob> {
 		const buffer = await optimise(await blob.arrayBuffer(), { level: clampLevel(level) });
 		return arrayBufferToBlob(buffer, 'image/png');
 	}

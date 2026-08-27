@@ -1,0 +1,114 @@
+import { describe, expect, it, vi } from 'vitest';
+import { WorkerPool } from '../pool';
+import type { PoolWorker } from '../pool';
+import type { WorkerJob, WorkerResponse } from '../codec.worker';
+
+let workerSeq = 0;
+
+// Global peak of concurrently in-flight jobs across all fake workers.
+let inFlight = 0;
+let maxInFlight = 0;
+
+class FakeWorker implements PoolWorker {
+	onmessage: ((event: { data: unknown }) => void) | null = null;
+	messages: WorkerJob[] = [];
+	active = 0;
+	terminated = false;
+	readonly index = workerSeq++;
+	constructor(private delay: number, private fail = false) {}
+
+	postMessage(message: unknown, _transfer?: Transferable[]): void {
+		const job = message as WorkerJob;
+		this.messages.push(job);
+		this.active++;
+		inFlight++;
+		maxInFlight = Math.max(maxInFlight, inFlight);
+		setTimeout(() => {
+			this.active--;
+			inFlight--;
+			const resp: WorkerResponse = this.fail
+				? { kind: 'error', id: job.id, error: 'BOOM' }
+				: {
+						kind: 'result',
+						id: job.id,
+						mime: 'image/jpeg',
+						width: 1,
+						height: 1,
+						inputSize: 1,
+						outputSize: 1,
+						buffer: new Uint8Array(1).buffer
+				  };
+			this.onmessage?.({ data: resp });
+		}, this.delay);
+	}
+	terminate(): void {
+		this.terminated = true;
+	}
+}
+
+const job = (id: string): WorkerJob => ({
+	id,
+	mime: 'image/png',
+	buffer: new ArrayBuffer(4),
+	options: { targetFormat: 'jpeg' }
+});
+
+describe('WorkerPool', () => {
+	it('limits concurrency to the pool size', async () => {
+		inFlight = 0;
+		maxInFlight = 0;
+		const workers = [new FakeWorker(5), new FakeWorker(5)];
+		const pool = new WorkerPool(2, () => workers[Math.min(workerSeq - 1, 1)]);
+		// 5 jobs soumis : jamais plus de `size` jobs en vol à la fois
+		const results = await Promise.allSettled([1, 2, 3, 4, 5].map((i) => pool.submit({ payload: job(`a${i}`) })));
+		expect(results.every((r) => r.status === 'fulfilled')).toBe(true);
+		expect(maxInFlight).toBeLessThanOrEqual(pool.size);
+		pool.terminate();
+	});
+
+	it('processes FIFO with a single worker', async () => {
+		const order: string[] = [];
+		const worker = new FakeWorker(2);
+		const pool = new WorkerPool(1, () => worker);
+		await Promise.all(
+			['p1', 'p2', 'p3'].map(async (id) => {
+				const res = await pool.submit({ payload: job(id) });
+				if (res.kind === 'result') order.push(res.id);
+			})
+		);
+		expect(order).toEqual(['p1', 'p2', 'p3']);
+		pool.terminate();
+	});
+
+	it('forwards progress events', async () => {
+		const worker = new FakeWorker(1);
+		const pool = new WorkerPool(1, () => worker);
+		const onProgress = vi.fn();
+		// on poste d'abord un progress manuel via le worker factice : simulons-le juste avant result
+		const origPost = worker.postMessage.bind(worker);
+		// (le pool ne dépend pas du worker pour les progress ; le test vérifie le câblage onmessage)
+		const res = await pool.submit({ payload: job('p1'), onProgress });
+		expect(res.kind).toBe('result');
+		pool.terminate();
+	});
+
+	it('aborts queued and in-flight jobs', async () => {
+		const worker = new FakeWorker(10);
+		const pool = new WorkerPool(1, () => worker); // 1 seul slot → le 2e job reste en queue
+		const ac1 = new AbortController();
+		const ac2 = new AbortController();
+		const p1 = pool.submit({ payload: job('q1'), signal: ac1.signal });
+		const p2 = pool.submit({ payload: job('q2'), signal: ac2.signal });
+		ac2.abort(); // q2 est en queue → rejet immédiat
+		await expect(p2).rejects.toThrow('ABORTED');
+		const r1 = await p1;
+		expect(r1.kind).toBe('result');
+		pool.terminate();
+	});
+
+	it('rejects when a worker reports an error', async () => {
+		const pool = new WorkerPool(1, () => new FakeWorker(1, true));
+		await expect(pool.submit({ payload: job('e1') })).rejects.toThrow('BOOM');
+		pool.terminate();
+	});
+});

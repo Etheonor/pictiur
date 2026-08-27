@@ -51,7 +51,11 @@ describe('handleWorkerJob', () => {
 			options: { targetFormat: 'fake' }
 		};
 		const res = await handleWorkerJob(job, {
-			env: { decode: async () => { throw new Error('DECODE_BROKEN'); } } as never
+			env: {
+				decode: async () => {
+					throw new Error('DECODE_BROKEN');
+				}
+			} as never
 		});
 		expect(res).toEqual({ kind: 'error', id: 'j2', error: 'DECODE_BROKEN' });
 	});

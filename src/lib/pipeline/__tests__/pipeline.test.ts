@@ -103,12 +103,19 @@ describe('runPipeline', () => {
 		const codec = fakeCodec();
 		const bigFile = { size: LIMITS.maxFileBytes + 1 } as unknown as Blob;
 		await expect(
-			runPipeline({ file: bigFile, mime: 'image/png', options: { targetFormat: 'fake' } }, env(codec))
+			runPipeline(
+				{ file: bigFile, mime: 'image/png', options: { targetFormat: 'fake' } },
+				env(codec)
+			)
 		).rejects.toThrow('MAX_FILE_SIZE');
 
 		await expect(
 			runPipeline(
-				{ file: new Blob([new Uint8Array(1)]), mime: 'image/png', options: { targetFormat: 'fake' } },
+				{
+					file: new Blob([new Uint8Array(1)]),
+					mime: 'image/png',
+					options: { targetFormat: 'fake' }
+				},
 				env(codec, rgba(LIMITS.maxDimension + 1, 10))
 			)
 		).rejects.toThrow('MAX_DIMENSION');
@@ -119,7 +126,11 @@ describe('runPipeline', () => {
 		e.getCodec = vi.fn(async () => undefined);
 		await expect(
 			runPipeline(
-				{ file: new Blob([new Uint8Array(1)]), mime: 'image/png', options: { targetFormat: 'inconnu' } },
+				{
+					file: new Blob([new Uint8Array(1)]),
+					mime: 'image/png',
+					options: { targetFormat: 'inconnu' }
+				},
 				e
 			)
 		).rejects.toThrow('UNKNOWN_FORMAT');

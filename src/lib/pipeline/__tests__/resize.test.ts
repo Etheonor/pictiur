@@ -44,7 +44,10 @@ describe('planResize (géométrie)', () => {
 
 describe('buildResizeSteps (step-down)', () => {
 	it('plans halving steps for huge images', () => {
-		const steps = buildResizeSteps({ width: 16_000, height: 8_000 }, { width: 2_000, height: 1_000 });
+		const steps = buildResizeSteps(
+			{ width: 16_000, height: 8_000 },
+			{ width: 2_000, height: 1_000 }
+		);
 		expect(steps.length).toBeGreaterThan(1);
 		for (const s of steps) {
 			expect(s.width).toBeGreaterThanOrEqual(2_000);
@@ -57,7 +60,9 @@ describe('buildResizeSteps (step-down)', () => {
 	});
 
 	it('skips step-down for small images', () => {
-		expect(buildResizeSteps({ width: 4000, height: 3000 }, { width: 800, height: 600 })).toEqual([]);
+		expect(buildResizeSteps({ width: 4000, height: 3000 }, { width: 800, height: 600 })).toEqual(
+			[]
+		);
 	});
 });
 

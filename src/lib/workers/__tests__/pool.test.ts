@@ -15,9 +15,12 @@ class FakeWorker implements PoolWorker {
 	active = 0;
 	terminated = false;
 	readonly index = workerSeq++;
-	constructor(private delay: number, private fail = false) {}
+	constructor(
+		private delay: number,
+		private fail = false
+	) {}
 
-	postMessage(message: unknown, _transfer?: Transferable[]): void {
+	postMessage(message: unknown): void {
 		const job = message as WorkerJob;
 		this.messages.push(job);
 		this.active++;
@@ -37,7 +40,7 @@ class FakeWorker implements PoolWorker {
 						inputSize: 1,
 						outputSize: 1,
 						buffer: new Uint8Array(1).buffer
-				  };
+					};
 			this.onmessage?.({ data: resp });
 		}, this.delay);
 	}
@@ -60,7 +63,9 @@ describe('WorkerPool', () => {
 		const workers = [new FakeWorker(5), new FakeWorker(5)];
 		const pool = new WorkerPool(2, () => workers[Math.min(workerSeq - 1, 1)]);
 		// 5 jobs soumis : jamais plus de `size` jobs en vol à la fois
-		const results = await Promise.allSettled([1, 2, 3, 4, 5].map((i) => pool.submit({ payload: job(`a${i}`) })));
+		const results = await Promise.allSettled(
+			[1, 2, 3, 4, 5].map((i) => pool.submit({ payload: job(`a${i}`) }))
+		);
 		expect(results.every((r) => r.status === 'fulfilled')).toBe(true);
 		expect(maxInFlight).toBeLessThanOrEqual(pool.size);
 		pool.terminate();
@@ -84,9 +89,6 @@ describe('WorkerPool', () => {
 		const worker = new FakeWorker(1);
 		const pool = new WorkerPool(1, () => worker);
 		const onProgress = vi.fn();
-		// on poste d'abord un progress manuel via le worker factice : simulons-le juste avant result
-		const origPost = worker.postMessage.bind(worker);
-		// (le pool ne dépend pas du worker pour les progress ; le test vérifie le câblage onmessage)
 		const res = await pool.submit({ payload: job('p1'), onProgress });
 		expect(res.kind).toBe('result');
 		pool.terminate();

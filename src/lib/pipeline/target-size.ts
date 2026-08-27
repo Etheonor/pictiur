@@ -10,7 +10,7 @@ export interface ProbeResult {
 
 export type ProbeFn = (quality: number) => Promise<ProbeResult>;
 
-export interface BudgetResult extends ProbeResult {}
+export type BudgetResult = ProbeResult;
 
 export interface BudgetParams {
 	minQuality?: number;

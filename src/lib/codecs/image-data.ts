@@ -1,7 +1,7 @@
 import type { RGBA } from './types';
 
 export function createImageData(rgba: RGBA): ImageData {
-	const data = rgba.data; // Uint8ClampedArray is what ImageData expects
+	const data = rgba.data as Uint8ClampedArray<ArrayBuffer>; // what ImageData expects
 	return new ImageData(data, rgba.width, rgba.height);
 }
 

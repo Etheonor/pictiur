@@ -1,0 +1,14 @@
+node_modules
+build
+.svelte-kit
+test-results
+.git
+.gitignore
+e2e
+*.md
+.dockerignore
+Dockerfile
+docker-compose.yml
+IMPLEMENTATION.md
+IMPLEMENTATION-PHASE*.md
+PLAN.md

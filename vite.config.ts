@@ -22,8 +22,7 @@ export default defineConfig({
 			manifest: {
 				name: 'Pictiúr',
 				short_name: 'Pictiúr',
-				description:
-					'Optimize images 100% locally — convert, resize, optimize in one pass.',
+				description: 'Optimize images 100% locally — convert, resize, optimize in one pass.',
 				theme_color: '#191919',
 				background_color: '#191919',
 				display: 'standalone',

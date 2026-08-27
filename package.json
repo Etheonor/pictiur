@@ -43,6 +43,8 @@
 	},
 	"dependencies": {
 		"@jsquash/jpeg": "^1.6.0",
+		"@jsquash/oxipng": "^2.3.0",
+		"@jsquash/png": "^3.1.1",
 		"@jsquash/webp": "^1.5.0"
 	}
 }

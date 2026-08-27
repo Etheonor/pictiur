@@ -3,6 +3,16 @@
 	import { settings, updateSettings } from '$lib/stores/settings.svelte';
 
 	let { formats }: { formats: { id: string; label: string }[] } = $props();
+
+	const isPng = $derived(settings.targetFormat === 'png');
+
+	function onFormatChange(value: string): void {
+		updateSettings({
+			targetFormat: value,
+			// PNG (lossless) n'a pas de mode budget → on bascule en qualité fixe
+			...(value === 'png' && settings.compressMode === 'weight' ? { compressMode: 'quality' } : {})
+		});
+	}
 </script>
 
 <fieldset>
@@ -10,10 +20,7 @@
 
 	<label>
 		{t(settings.lang, 'settings.format')}
-		<select
-			value={settings.targetFormat}
-			onchange={(e) => updateSettings({ targetFormat: e.currentTarget.value })}
-		>
+		<select value={settings.targetFormat} onchange={(e) => onFormatChange(e.currentTarget.value)}>
 			{#each formats as format (format.id)}
 				<option value={format.id}>{format.label}</option>
 			{/each}
@@ -26,23 +33,29 @@
 			<input
 				type="radio"
 				name="mode"
-				checked={settings.compressMode === 'quality'}
+				checked={settings.compressMode === 'quality' || isPng}
 				onchange={() => updateSettings({ compressMode: 'quality' })}
 			/>
 			{t(settings.lang, 'settings.mode.quality')}
 		</label>
-		<label>
+		<label aria-disabled={isPng}>
 			<input
 				type="radio"
 				name="mode"
-				checked={settings.compressMode === 'weight'}
+				checked={settings.compressMode === 'weight' && !isPng}
+				disabled={isPng}
 				onchange={() => updateSettings({ compressMode: 'weight' })}
 			/>
 			{t(settings.lang, 'settings.mode.weight')}
 		</label>
+		{#if isPng}
+			<small style="color: var(--pico-muted-color);"
+				>{t(settings.lang, 'settings.mode.weightPng')}</small
+			>
+		{/if}
 	</fieldset>
 
-	{#if settings.compressMode === 'quality'}
+	{#if isPng || settings.compressMode === 'quality'}
 		<label>
 			{t(settings.lang, 'settings.quality')} — {settings.quality}
 			<input

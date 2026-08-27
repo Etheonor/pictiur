@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { filesFromList, outputFileName } from '../files';
+import { filesFromList, outputFileName, toPipelineOptions } from '../files';
 
 describe('filesFromList', () => {
 	it('accepts supported images and reports the rest', async () => {
@@ -25,5 +25,28 @@ describe('outputFileName', () => {
 		expect(outputFileName('photo.png', 'image/webp')).toBe('photo.webp');
 		expect(outputFileName('photo.jpeg', 'image/jpeg')).toBe('photo.jpg');
 		expect(outputFileName('photo', 'image/avif')).toBe('photo.avif');
+	});
+});
+
+describe('toPipelineOptions', () => {
+	const base = {
+		compressMode: 'weight' as const,
+		quality: 80,
+		maxWidth: 0,
+		maxHeight: 0,
+		fit: 'contain' as const,
+		maxWeightKB: 600
+	};
+
+	it('passes budget for lossy formats', () => {
+		const o = toPipelineOptions({ ...base, targetFormat: 'webp' });
+		expect(o.maxWeightKB).toBe(600);
+		expect(o.quality).toBeUndefined();
+	});
+
+	it('never applies budget to png (lossless, oxipng ignores quality)', () => {
+		const o = toPipelineOptions({ ...base, targetFormat: 'png' });
+		expect(o.maxWeightKB).toBeUndefined();
+		expect(o.quality).toBe(80);
 	});
 });

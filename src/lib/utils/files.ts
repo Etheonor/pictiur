@@ -70,10 +70,13 @@ export function toPipelineOptions(settings: {
 	fit: 'contain' | 'cover' | 'fill';
 	maxWeightKB: number;
 }): PipelineOptions {
+	// Le budget (poids max) est sans effet sur PNG : oxipng ignore la qualité.
+	// PNG passe donc toujours en qualité fixe (garde-fou).
+	const weight = settings.compressMode === 'weight' && settings.targetFormat !== 'png';
 	return {
 		targetFormat: settings.targetFormat,
-		quality: settings.compressMode === 'quality' ? settings.quality : undefined,
-		maxWeightKB: settings.compressMode === 'weight' ? settings.maxWeightKB : undefined,
+		quality: weight ? undefined : settings.quality,
+		maxWeightKB: weight ? settings.maxWeightKB : undefined,
 		maxWidth: settings.maxWidth || undefined,
 		maxHeight: settings.maxHeight || undefined,
 		fit: settings.fit

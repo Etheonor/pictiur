@@ -13,6 +13,8 @@
 <svelte:head>
 	<title>Pictiúr</title>
 	<meta name="description" content="Optimize images 100% locally" />
+	<meta name="theme-color" content="#191919" />
+	<link rel="manifest" href="/manifest.webmanifest" />
 	<link rel="icon" href={favicon} />
 </svelte:head>
 

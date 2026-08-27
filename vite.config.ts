@@ -2,7 +2,7 @@ import { defineConfig } from 'vitest/config';
 import { playwright } from '@vitest/browser-playwright';
 import adapter from '@sveltejs/adapter-static';
 import { sveltekit } from '@sveltejs/kit/vite';
-import { VitePWA } from 'vite-plugin-pwa';
+import { SvelteKitPWA } from '@vite-pwa/sveltekit';
 
 export default defineConfig({
 	plugins: [
@@ -16,7 +16,7 @@ export default defineConfig({
 			// adapter-static SPA: a single shell, everything built client-side.
 			adapter: adapter({ fallback: 'index.html' })
 		}),
-		VitePWA({
+		SvelteKitPWA({
 			registerType: 'autoUpdate',
 			includeAssets: ['favicon.ico'],
 			manifest: {
@@ -32,7 +32,13 @@ export default defineConfig({
 				]
 			},
 			workbox: {
-				globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}']
+				globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2,wasm}'], // ← wasm ajouté
+				maximumFileSizeToCacheInBytes: 8 * 1024 * 1024, // ← 8 Mo (défaut Workbox = 2 Mo)
+				navigateFallback: 'index.html', // ← SPA offline
+				cleanupOutdatedCaches: true,
+				// L'adapter-static écrit build/index.html APRÈS la génération du manifest :
+				// on force le fallback SPA dans le precache (servi offline par navigateFallback).
+				additionalManifestEntries: [{ url: 'index.html', revision: 'spa-fallback' }]
 			}
 		})
 	],

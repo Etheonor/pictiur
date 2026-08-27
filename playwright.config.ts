@@ -10,5 +10,7 @@ export default defineConfig({
 	workers: 1,
 	webServer: { command: 'pnpm dev', port: 5173, reuseExistingServer: true },
 	use: { baseURL: 'http://localhost:5173' },
-	testMatch: ['e2e/**/*.{e2e,spec}.{ts,js}', 'src/**/*.e2e.{ts,js}']
+	testMatch: ['e2e/**/*.{e2e,spec}.{ts,js}', 'src/**/*.e2e.{ts,js}'],
+	// offline.spec.ts exige build+preview (SW réel) → tourne via `pnpm test:offline`
+	testIgnore: ['**/offline.spec.ts']
 });

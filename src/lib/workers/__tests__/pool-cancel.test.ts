@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { WorkerPool } from '../pool';
 import type { PoolWorker } from '../pool';
-import type { WorkerCommand } from '../codec.worker';
 
 class FakeWorker implements PoolWorker {
 	onmessage: ((event: { data: unknown }) => void) | null = null;

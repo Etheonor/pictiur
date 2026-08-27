@@ -7,7 +7,7 @@ test('budget mode on 3 large images: fast and under target', async ({ page }) =>
 		const { createBrowserPool } = await import('/src/lib/workers/index.ts');
 		const pool = createBrowserPool(2);
 
-		const makeLarge = async (w: number, h: number, seed: number): Promise<ArrayBuffer> => {
+		const makeLarge = async (w: number, h: number): Promise<ArrayBuffer> => {
 			const canvas = new OffscreenCanvas(w, h);
 			const ctx = canvas.getContext('2d')!;
 			const img = ctx.createImageData(w, h);
@@ -18,7 +18,6 @@ test('budget mode on 3 large images: fast and under target', async ({ page }) =>
 					const i = (y * w + x) * 4;
 					const r = (x / w) * 255;
 					const g = (y / h) * 255;
-					const n = (x * 31 + y * 17 + seed * 7) % 40; // bruit léger
 					img.data[i] = r;
 					img.data[i + 1] = g;
 					img.data[i + 2] = (r + g) / 2;
@@ -26,13 +25,15 @@ test('budget mode on 3 large images: fast and under target', async ({ page }) =>
 				}
 			}
 			ctx.putImageData(img, 0, 0);
-			return canvas.convertToBlob({ type: 'image/jpeg', quality: 0.95 }).then((b) => b.arrayBuffer());
+			return canvas
+				.convertToBlob({ type: 'image/jpeg', quality: 0.95 })
+				.then((b) => b.arrayBuffer());
 		};
 
 		const targets = [150, 120, 90]; // Ko
 		const results = [];
 		for (let i = 0; i < 3; i++) {
-			const buffer = await makeLarge(3000, 2000, i + 1);
+			const buffer = await makeLarge(3000, 2000);
 			const t0 = performance.now();
 			const res = await pool.submit({
 				payload: {

@@ -33,9 +33,7 @@ const wasm = files.filter((f) => f.endsWith('.wasm'));
 const entries = files.filter((f) => f.split('/').includes('entry') && f.endsWith('.js'));
 const entrySize = entries.reduce((n, f) => n + statSync(f).size, 0);
 // Chunks JS (hors worker dédié)
-const mainChunks = files.filter(
-	(f) => f.endsWith('.js') && !f.includes('/workers/')
-);
+const mainChunks = files.filter((f) => f.endsWith('.js') && !f.includes('/workers/'));
 
 const failures = [];
 // Preuve du lazy loading AVIF/JXL : leurs .wasm existent en fichiers séparés
@@ -56,7 +54,8 @@ if (wasm.length === 0) {
 		console.warn('⚠ aucun .wasm émis — glue inline accepté (chunks raisonnables).');
 	}
 }
-if (entrySize > 600_000) failures.push(`entry chunk trop grosse : ${Math.round(entrySize / 1024)} Ko`);
+if (entrySize > 600_000)
+	failures.push(`entry chunk trop grosse : ${Math.round(entrySize / 1024)} Ko`);
 
 if (failures.length) {
 	console.error('✗ BUNDLE', failures.join('\n'));

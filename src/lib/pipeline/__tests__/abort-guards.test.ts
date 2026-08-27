@@ -1,6 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { Codec, RGBA } from '../../codecs/types';
-import { LIMITS } from '../job';
 import { runPipeline } from '../index';
 
 const fakeRgba = (w: number, h: number): RGBA => ({
@@ -31,7 +30,11 @@ describe('garde-fous mémoire', () => {
 		const e = baseEnv(codec, fakeRgba(20_000, 20_000)); // 400 MP
 		await expect(
 			runPipeline(
-				{ file: new Blob([new Uint8Array(1)]), mime: 'image/png', options: { targetFormat: 'fake' } },
+				{
+					file: new Blob([new Uint8Array(1)]),
+					mime: 'image/png',
+					options: { targetFormat: 'fake' }
+				},
 				e
 			)
 		).rejects.toThrow('MAX_PIXELS');
@@ -55,7 +58,7 @@ describe('annulation coopérative', () => {
 
 	it('stoppe pendant la boucle budget (pas de probe supplémentaire)', async () => {
 		let cancelled = false;
-		const encode = vi.fn(async (_r: RGBA, o: { quality?: number }) => {
+		const encode = vi.fn(async () => {
 			cancelled = true; // la 1re probe déclenche l'annulation
 			return new Blob([new Uint8Array(100)]);
 		});

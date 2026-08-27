@@ -42,13 +42,10 @@ describe('encodeWithinBudget avec quality initiale', () => {
 
 	it('still works without an initial guess (backward compatible)', async () => {
 		const calls: number[] = [];
-		const res = await encodeWithinBudget(
-			async (q) => {
-				calls.push(q);
-				return probe(q);
-			},
-			50_000
-		);
+		const res = await encodeWithinBudget(async (q) => {
+			calls.push(q);
+			return probe(q);
+		}, 50_000);
 		expect(res.size).toBeLessThanOrEqual(50_000 * 1.1);
 		expect(calls[0]).toBe(Math.round((20 + 95) / 2)); // bissection classique
 	});

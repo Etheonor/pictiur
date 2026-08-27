@@ -7,8 +7,8 @@ test('app is installable and works fully offline', async ({ page }) => {
 	await page.waitForFunction(() => navigator.serviceWorker.controller !== null);
 
 	// 2) installation : manifest présent dans le DOM
-	const manifest = await page.evaluate(
-		() => document.querySelector('link[rel="manifest"]')?.getAttribute('href')
+	const manifest = await page.evaluate(() =>
+		document.querySelector('link[rel="manifest"]')?.getAttribute('href')
 	);
 	expect(manifest).toBeTruthy();
 

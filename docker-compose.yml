@@ -1,0 +1,11 @@
+services:
+  pictiur:
+    image: ghcr.io/etheonor/pictiur:latest
+    container_name: pictiur
+    restart: unless-stopped
+    ports:
+      - "3002:80" # port 8080 occupé par coolify-proxy → 3002
+    environment:
+      # Auth basique optionnelle : laisser vide = accès libre
+      - USERNAME=
+      - PASSWORD=

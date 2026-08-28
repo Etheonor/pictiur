@@ -24,6 +24,9 @@ vite.config.ts.timestamp-*
 # Playwright
 test-results
 
+# Internal docs (briefs for AI, planning…) — never committed
+/docs/
+
 # Sample images dropped at the root for manual testing
 /*.png
 /*.jpg

@@ -13,7 +13,7 @@ export interface RejectedFile {
 	reason: 'unsupported' | 'tooLarge';
 }
 
-// Formats readable by createImageBitmap (v1, PLAN §2 "Format coverage")
+// Formats readable by createImageBitmap or the WASM decode fallback (HEIC/HEIF).
 export const INPUT_MIMES = new Set([
 	'image/jpeg',
 	'image/png',
@@ -21,8 +21,20 @@ export const INPUT_MIMES = new Set([
 	'image/gif',
 	'image/svg+xml',
 	'image/bmp',
-	'image/avif'
+	'image/avif',
+	'image/heic',
+	'image/heif'
 ]);
+
+const HEIC_EXT = /\.heic$/i;
+
+function normalizeInputType(file: File): string {
+	// iPhones sometimes share HEIC photos as application/octet-stream: fall back to the extension.
+	if (file.type === 'application/octet-stream' && HEIC_EXT.test(file.name)) {
+		return 'image/heic';
+	}
+	return file.type;
+}
 
 export async function filesFromList(
 	list: FileList | File[]
@@ -30,7 +42,8 @@ export async function filesFromList(
 	const files: InputFile[] = [];
 	const rejected: RejectedFile[] = [];
 	for (const file of Array.from(list)) {
-		if (!INPUT_MIMES.has(file.type)) {
+		const mime = normalizeInputType(file);
+		if (!INPUT_MIMES.has(mime)) {
 			rejected.push({ name: file.name, reason: 'unsupported' });
 			continue;
 		}
@@ -40,7 +53,7 @@ export async function filesFromList(
 		}
 		files.push({
 			name: file.name,
-			mime: file.type,
+			mime,
 			size: file.size,
 			buffer: await file.arrayBuffer()
 		});

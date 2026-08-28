@@ -20,6 +20,31 @@ describe('filesFromList', () => {
 	});
 });
 
+describe('heic / heif (inputs)', () => {
+	it('accepts the standard mime', async () => {
+		const f = new File([new Uint8Array(4)], 'photo.heic', { type: 'image/heic' });
+		const { files, rejected } = await filesFromList([f]);
+		expect(rejected).toHaveLength(0);
+		expect(files[0].mime).toBe('image/heic');
+	});
+
+	it('accepts by extension even with a generic mime (iPhone octet-stream)', async () => {
+		const f = new File([new Uint8Array(4)], 'IMG_1234.HEIC', {
+			type: 'application/octet-stream'
+		});
+		const { files, rejected } = await filesFromList([f]);
+		expect(rejected).toHaveLength(0);
+		expect(files[0].mime).toBe('image/heic');
+	});
+
+	it('rejects an octet-stream without an image extension', async () => {
+		const f = new File([new Uint8Array(4)], 'archive.bin', { type: 'application/octet-stream' });
+		const { files, rejected } = await filesFromList([f]);
+		expect(files).toHaveLength(0);
+		expect(rejected[0].reason).toBe('unsupported');
+	});
+});
+
 describe('outputFileName', () => {
 	it('maps mime to the right extension', () => {
 		expect(outputFileName('photo.png', 'image/webp')).toBe('photo.webp');

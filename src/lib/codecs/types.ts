@@ -31,7 +31,7 @@ export interface Codec {
 	kind: CodecKind;
 	supports: CodecCapabilities;
 	defaultQuality: number;
-	encode(rgba: RGBA, opts: EncodeOptions): Promise<Blob>;
-	decode?(data: ArrayBuffer): Promise<RGBA>;
+	encode?(rgba: RGBA, opts: EncodeOptions): Promise<Blob>; // absent for decode-only codecs
+	decode?(data: ArrayBuffer): Promise<RGBA>; // absent for encode-only codecs
 	optimize?(blob: Blob, level: number): Promise<Blob>;
 }

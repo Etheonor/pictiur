@@ -11,6 +11,7 @@ registerStaticCodec(pngCodec);
 // Cold codecs: heavy WASM loaded on demand (dynamic import → separate chunks).
 registerCodec('avif', () => import('./avif').then((m) => m.avifCodec));
 registerCodec('jxl', () => import('./jxl').then((m) => m.jxlCodec));
+registerCodec('heic', () => import('./heic').then((m) => m.heicCodec));
 
 export { getCodec, listCodecs, codecIdFromMime } from './registry';
 export type { Codec, CodecCapabilities, EncodeOptions, RGBA } from './types';

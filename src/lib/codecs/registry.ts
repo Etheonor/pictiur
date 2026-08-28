@@ -36,7 +36,9 @@ const MIME_TO_ID: Record<string, string> = {
 	'image/png': 'png',
 	'image/webp': 'webp',
 	'image/avif': 'avif',
-	'image/jxl': 'jxl'
+	'image/jxl': 'jxl',
+	'image/heic': 'heic',
+	'image/heif': 'heic'
 };
 
 export function codecIdFromMime(mime: string): string | undefined {

@@ -36,7 +36,9 @@
 			onChange: refresh
 		});
 		const codecs = await listCodecs();
-		formats = codecs.map((c) => ({ id: c.id, label: c.label }));
+		formats = codecs
+			.filter((c) => c.kind !== 'decode') // output formats only
+			.map((c) => ({ id: c.id, label: c.label }));
 	});
 
 	function refresh(): void {

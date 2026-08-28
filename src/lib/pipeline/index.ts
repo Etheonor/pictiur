@@ -1,6 +1,5 @@
 import { getCodec } from '../codecs';
 import type { Codec, RGBA } from '../codecs/types';
-import { codecIdFromMime } from '../codecs';
 import { encodeRgba } from './encode';
 import { LIMITS, resolveOptions, validateOptions } from './job';
 import type { PipelineInput, PipelineResult } from './job';
@@ -19,11 +18,13 @@ export interface PipelineEnv {
 	shouldCancel?: () => boolean;
 }
 
-/** Native browser/worker decode: applies EXIF orientation (from-image). */
-export async function decodeInBrowser(
-	blob: Blob,
-	resolveCodec: (id: string) => Promise<Codec | undefined> = getCodec
-): Promise<RGBA> {
+// --- backup decoder resolution (HEIC/HEIF only) ---
+export function resolveDecoderId(mime: string): string | undefined {
+	return mime === 'image/heic' || mime === 'image/heif' ? 'heic' : undefined;
+}
+
+/** Native browser decode: createImageBitmap, otherwise the WASM codec for HEIC/HEIF. */
+export async function decodeInBrowser(blob: Blob, fallbackCodecId?: string): Promise<RGBA> {
 	try {
 		const bitmap = await createImageBitmap(blob);
 		try {
@@ -36,13 +37,15 @@ export async function decodeInBrowser(
 		} finally {
 			bitmap.close();
 		}
-	} catch {
-		// WASM fallback (PLAN §3.4): createImageBitmap fails for some formats
-		// (e.g. AVIF on old browsers, JXL outside Safari). Try the native decoder.
-		const id = codecIdFromMime(blob.type);
-		const codec = id ? await resolveCodec(id) : undefined;
-		if (codec?.decode) return codec.decode(await blob.arrayBuffer());
-		throw new Error('DECODE_FAILED');
+	} catch (error) {
+		// Target a real decode failure (e.g. HEIC has no native support): only fall back
+		// for heic/heif — a JPEG/PNG failure must surface, not be swallowed.
+		if (!fallbackCodecId) {
+			throw new Error(error instanceof Error ? error.message : String(error), { cause: error });
+		}
+		const codec = await getCodec(fallbackCodecId);
+		if (!codec?.decode) throw new Error('UNSUPPORTED_FORMAT', { cause: error });
+		return codec.decode(await blob.arrayBuffer());
 	}
 }
 
@@ -50,7 +53,8 @@ export async function runPipeline(
 	input: PipelineInput,
 	env: PipelineEnv = {}
 ): Promise<PipelineResult> {
-	const decode = env.decode ?? decodeInBrowser;
+	const decode =
+		env.decode ?? ((blob: Blob) => decodeInBrowser(blob, resolveDecoderId(input.mime)));
 	const resize = env.resize ?? resizeRgba;
 	const resolveCodec = env.getCodec ?? getCodec;
 	const onProgress = env.onProgress ?? (() => {});

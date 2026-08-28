@@ -11,7 +11,7 @@ const nodeCannotLoadWasm = true;
 
 describe('png codec (oxipng)', () => {
 	it.skipIf(nodeCannotLoadWasm)('encodes a valid PNG', async () => {
-		const blob = await pngCodec.encode(gradientRgba(24, 24), { quality: 100 });
+		const blob = await pngCodec.encode!(gradientRgba(24, 24), { quality: 100 });
 		const buf = await blob.arrayBuffer();
 		expect(hex(buf).startsWith('89 50 4e 47')).toBe(true); // PNG magic bytes
 		expect(blob.type).toBe('image/png');
@@ -24,7 +24,7 @@ describe('png codec (oxipng)', () => {
 	});
 
 	it.skipIf(nodeCannotLoadWasm)('roundtrips with same dimensions', async () => {
-		const blob = await pngCodec.encode(gradientRgba(16, 16), { quality: 100, effort: 4 });
+		const blob = await pngCodec.encode!(gradientRgba(16, 16), { quality: 100, effort: 4 });
 		const rgba = await pngCodec.decode!(await blob.arrayBuffer());
 		expect(rgba.width).toBe(16);
 		expect(rgba.height).toBe(16);

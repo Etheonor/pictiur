@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@discourse/heic':
+        specifier: ^1.0.0
+        version: 1.0.0
       '@jsquash/avif':
         specifier: ^2.1.1
         version: 2.1.1
@@ -617,6 +620,9 @@ packages:
 
   '@blazediff/core@1.9.1':
     resolution: {integrity: sha512-ehg3jIkYKulZh+8om/O25vkvSsXXwC+skXmyA87FFx6A/45eqOkZsBltMw/TVteb0mloiGT8oGRTcjRAz66zaA==}
+
+  '@discourse/heic@1.0.0':
+    resolution: {integrity: sha512-YMW5o0bHvhL4rjzGt7kpr8geqMEhP7yS20Hh5eMJtDOmHuCqn+icpNLr1ImFygU/yN39MUHVenETXcpDG6PPww==}
 
   '@eslint-community/eslint-utils@4.10.1':
     resolution: {integrity: sha512-cuadcxVFE8sDK6iWJbs8Sn0av2Nrh2QSGQhVlBW9AaAHqHwjWsZHT8LJ4hFGPh7ASBV2deFdM7H/DPjulmh8rg==}
@@ -3378,6 +3384,8 @@ snapshots:
 
   '@blazediff/core@1.9.1':
     optional: true
+
+  '@discourse/heic@1.0.0': {}
 
   '@eslint-community/eslint-utils@4.10.1(eslint@10.9.1)':
     dependencies:

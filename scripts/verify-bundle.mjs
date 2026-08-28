@@ -42,6 +42,7 @@ const hasAvifWasm = wasm.some((f) => f.includes('avif'));
 const hasJxlWasm = wasm.some((f) => f.includes('jxl'));
 if (!hasAvifWasm) failures.push('avif wasm missing — lazy import broken');
 if (!hasJxlWasm) failures.push('jxl wasm missing — lazy import broken');
+if (!wasm.some((f) => f.includes('heic'))) failures.push('heic wasm missing — lazy import broken');
 
 if (wasm.length === 0) {
 	// the glue may have inlined the wasm as base64: acceptable if no giant chunk

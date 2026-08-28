@@ -12,7 +12,7 @@ const nodeCannotLoadWasm = true;
 describe('jxl codec', () => {
 	it.skipIf(nodeCannotLoadWasm)('encodes and decodes a JXL image', async () => {
 		// Keep the fixture small: libjxl encoding is slow.
-		const blob = await jxlCodec.encode(gradientRgba(16, 16), { quality: 75, effort: 3 });
+		const blob = await jxlCodec.encode!(gradientRgba(16, 16), { quality: 75, effort: 3 });
 		expect(blob.type).toBe('image/jxl');
 		expect(await blob.arrayBuffer()).not.toHaveLength(0);
 
@@ -22,7 +22,7 @@ describe('jxl codec', () => {
 	});
 
 	it.skipIf(nodeCannotLoadWasm)('supports lossless mode', async () => {
-		const blob = await jxlCodec.encode(gradientRgba(16, 16), {
+		const blob = await jxlCodec.encode!(gradientRgba(16, 16), {
 			quality: 100,
 			lossless: true,
 			effort: 3

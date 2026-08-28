@@ -8,7 +8,7 @@ on:
 
 permissions:
   contents: read
-  packages: write # nécessaires pour pousser sur ghcr.io
+  packages: write # required to push to ghcr.io
 
 jobs:
   quality:
@@ -49,7 +49,7 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
-      - run: pnpm verify:bundle # chunks lazy + entry raisonnable
+      - run: pnpm verify:bundle # lazy chunks + reasonable entry
 
   offline:
     runs-on: ubuntu-latest
@@ -62,7 +62,7 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec playwright install --with-deps chromium
-      - run: pnpm test:offline # build + preview + SW réel
+      - run: pnpm test:offline # build + preview + real SW
 
   docker:
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
@@ -71,8 +71,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - id: repo
-        # github.repository garde la casse du propriétaire (ex. Etheonor/pictiur),
-        # or les noms de dépôts GHCR doivent être en minuscules.
+        # github.repository keeps the owner's case (e.g. Etheonor/pictiur),
+        # but GHCR repository names must be lowercase.
         run: echo "image=ghcr.io/${GITHUB_REPOSITORY@L}" >> "$GITHUB_OUTPUT"
       - uses: docker/setup-buildx-action@v3
       - uses: docker/login-action@v3

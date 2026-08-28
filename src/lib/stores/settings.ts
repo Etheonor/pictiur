@@ -2,11 +2,11 @@ export type CompressionMode = 'quality' | 'weight';
 export type FitMode = 'contain' | 'cover' | 'fill';
 
 export interface Settings {
-	targetFormat: string; // codec id ('webp' par défaut)
+	targetFormat: string; // codec id ('webp' by default)
 	compressMode: CompressionMode;
 	quality: number; // 0-100
-	maxWidth: number; // 0 = pas de limite
-	maxHeight: number; // 0 = pas de limite
+	maxWidth: number; // 0 = no limit
+	maxHeight: number; // 0 = no limit
 	fit: FitMode;
 	maxWeightKB: number;
 	lang: 'fr' | 'en';
@@ -33,7 +33,7 @@ const clamp = (n: number, min: number, max: number): number => Math.min(max, Mat
 const intOr = (v: unknown, fallback: number): number =>
 	typeof v === 'number' && Number.isFinite(v) ? Math.max(0, Math.round(v)) : fallback;
 
-/** Nettoie n'importe quelle entrée (localStorage corrompu, JSON tiers…) → Settings valides. */
+/** Sanitizes any input (corrupted localStorage, third-party JSON…) → valid Settings. */
 export function sanitizeSettings(value: Partial<Settings> | unknown): Settings {
 	const v = (value ?? {}) as Partial<Settings>;
 	return {
@@ -68,6 +68,6 @@ export function saveSettings(settings: Settings): void {
 	try {
 		localStorage.setItem(STORAGE_KEY, JSON.stringify(sanitizeSettings(settings)));
 	} catch {
-		// stockage plein/désactivé : on ignore, l'app reste utilisable
+		// storage full/disabled: ignore, the app stays usable
 	}
 }

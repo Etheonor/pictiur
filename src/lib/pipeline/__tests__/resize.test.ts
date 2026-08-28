@@ -9,7 +9,7 @@ installImageDataPolyfill();
 // Skipped here; the real proof is the browser pipeline smoke test.
 const nodeCannotLoadWasm = true;
 
-describe('planResize (géométrie)', () => {
+describe('planResize (geometry)', () => {
 	it('returns null when the image already fits', () => {
 		expect(planResize({ width: 500, height: 300 }, 'contain', 800, 800)).toBeNull();
 	});
@@ -53,7 +53,7 @@ describe('buildResizeSteps (step-down)', () => {
 			expect(s.width).toBeGreaterThanOrEqual(2_000);
 			expect(s.height).toBeGreaterThanOrEqual(1_000);
 		}
-		// steps sont décroissants
+		// steps are strictly decreasing
 		for (let i = 1; i < steps.length; i++) {
 			expect(steps[i].width).toBeLessThan(steps[i - 1].width);
 		}
@@ -72,14 +72,14 @@ describe('centerCrop', () => {
 		const crop = centerCrop(rgba, 40, 40);
 		expect(crop.width).toBe(40);
 		expect(crop.height).toBe(40);
-		// pixel au centre de la source (30, 20) = coin du crop
+		// pixel at the source center (30, 20) = corner of the crop
 		const srcIdx = (20 * 100 + 30) * 4;
 		const dstIdx = 0;
 		expect(crop.data[dstIdx]).toBe(rgba.data[srcIdx]);
 	});
 });
 
-describe('resizeRgba (wasm — voir Pièges n°5 si échec en Node)', () => {
+describe('resizeRgba (wasm — see Pitfalls #5 if it fails in Node)', () => {
 	it.skipIf(nodeCannotLoadWasm)('downscales and keeps dimensions', async () => {
 		const out = await resizeRgba(gradientRgba(8, 8), 4, 4);
 		expect(out.width).toBe(4);

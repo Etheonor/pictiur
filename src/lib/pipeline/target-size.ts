@@ -16,18 +16,18 @@ export interface BudgetParams {
 	minQuality?: number;
 	maxQuality?: number;
 	maxIterations?: number;
-	tolerance?: number; // dépassement toléré (0.1 = +10 %)
-	/** Première qualité sondée (heuristique). Consomme une itération. */
+	tolerance?: number; // allowed overshoot (0.1 = +10 %)
+	/** First probed quality (heuristic). Costs one iteration. */
 	initialQuality?: number;
-	/** Appelé avant chaque probe — sert la cancellation (T4.2). */
+	/** Called before each probe — used for cancellation (T4.2). */
 	onRoundStart?: () => void;
-	/** Progression 70→95 pendant la boucle budget (pour l'UI). */
+	/** Progress 70→95 during the budget loop (for the UI). */
 	onProgress?: (progress: number) => void;
 }
 
 /**
- * Heuristique de qualité initiale : plus la cible est agressive (ratio octets
- * source / octets cibles élevé), plus la première qualité est basse.
+ * Initial quality heuristic: the more aggressive the target (high source
+ * bytes / target bytes ratio), the lower the initial quality.
  */
 export function initialQualityGuess(
 	rawBytes: number,
@@ -38,16 +38,16 @@ export function initialQualityGuess(
 	const lo = min ?? LIMITS.qualityMin;
 	const hi = max ?? LIMITS.qualityMax;
 	if (!Number.isFinite(rawBytes) || rawBytes <= 0 || targetBytes <= 0) return lo;
-	// heuristique : ~-12 points de qualité par octave d'écart (ratio)
+	// heuristic: ~-12 quality points per octave of ratio gap
 	const ratio = rawBytes / targetBytes;
 	const guess = 78 - Math.log2(ratio) * 12;
 	return Math.min(hi, Math.max(lo, Math.round(guess)));
 }
 
 /**
- * Bissection sur la qualité : renvoie la plus haute qualité dont le poids
- * tient dans `targetBytes` (tolérance incluse), ou la qualité minimale
- * si même elle déborde. Total ≤ `maxIterations` probes.
+ * Quality bisection: returns the highest quality whose weight
+ * fits within `targetBytes` (tolerance included), or the minimum quality
+ * if even that overflows. Total ≤ `maxIterations` probes.
  */
 export async function encodeWithinBudget(
 	probe: ProbeFn,
@@ -72,7 +72,7 @@ export async function encodeWithinBudget(
 		return probe(q);
 	};
 
-	// 1) estimation initiale (optionnelle)
+	// 1) initial estimate (optional)
 	if (params.initialQuality !== undefined) {
 		const q = Math.min(maxQ, Math.max(minQ, Math.round(params.initialQuality)));
 		const result = await probeOnce(q);
@@ -84,7 +84,7 @@ export async function encodeWithinBudget(
 		}
 	}
 
-	// 2) bissection — on réserve 1 probe pour le fallback minQ (≤ maxIt au total)
+	// 2) bisection — keep 1 probe for the minQ fallback (≤ maxIt in total)
 	while (probes < maxIt - 1 && lo <= hi) {
 		const q = Math.round((lo + hi) / 2);
 		const result = await probeOnce(q);

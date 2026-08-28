@@ -1,5 +1,5 @@
-// Worker dédié : exécute une pipeline complète par message.
-// ⚠️ On n'importe PAS la lib TS "WebWorker" (conflit avec DOM) : on caste `self` à la main.
+// Dedicated worker: runs a full pipeline per message.
+// ⚠️ We do NOT import the TS "WebWorker" lib (conflicts with DOM): we cast `self` manually.
 import { runPipeline } from '../pipeline';
 import type { PipelineEnv } from '../pipeline';
 import type { PipelineOptions } from '../pipeline/job';
@@ -31,7 +31,7 @@ export type WorkerCommand = WorkerJob | { kind: 'cancel'; id: string };
 
 export interface WorkerHooks {
 	onProgress?: (progress: number) => void;
-	env?: PipelineEnv; // injectable pour les tests
+	env?: PipelineEnv; // injectable for tests
 	shouldCancel?: () => boolean;
 }
 
@@ -66,7 +66,7 @@ export async function handleWorkerJob(
 	}
 }
 
-// --- wiring navigateur -------------------------------------------------
+// --- browser wiring -------------------------------------------------
 // Guarded so the module can be imported in Node (Vitest) without a `self`.
 if (typeof self !== 'undefined') {
 	const cancelled = new Set<string>();
@@ -91,7 +91,7 @@ if (typeof self !== 'undefined') {
 		}).then((response) => {
 			cancelled.delete(job.id);
 			if (response.kind === 'result') {
-				workerSelf.postMessage(response, [response.buffer]); // transfert zéro-copie
+				workerSelf.postMessage(response, [response.buffer]); // zero-copy transfer
 			} else {
 				workerSelf.postMessage(response);
 			}

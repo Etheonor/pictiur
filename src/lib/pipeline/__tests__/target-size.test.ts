@@ -3,7 +3,7 @@ import { encodeWithinBudget } from '../target-size';
 import type { ProbeFn } from '../target-size';
 
 describe('encodeWithinBudget', () => {
-	// probe déterministe : plus la qualité est haute, plus le fichier est gros
+	// deterministic probe: the higher the quality, the bigger the file
 	const makeProbe = (): { probe: ProbeFn; calls: number[] } => {
 		const calls: number[] = [];
 		return {
@@ -26,14 +26,14 @@ describe('encodeWithinBudget', () => {
 
 	it('respects quality bounds and returns the floor when all fail', async () => {
 		const { probe, calls } = makeProbe();
-		const res = await encodeWithinBudget(probe, 10); // même qMin déborde
+		const res = await encodeWithinBudget(probe, 10); // even qMin overflows
 		expect(res.quality).toBe(20);
 		expect(calls.length).toBeLessThanOrEqual(6);
 	});
 
 	it('uses the best (highest) quality that still fits', async () => {
 		const { probe } = makeProbe();
-		const res = await encodeWithinBudget(probe, 5000); // tout rentre
+		const res = await encodeWithinBudget(probe, 5000); // everything fits
 		expect(res.quality).toBeGreaterThanOrEqual(90);
 	});
 });

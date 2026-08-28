@@ -1,8 +1,8 @@
 import { expect, test } from '@playwright/test';
 
 test('budget mode on 3 large images: fast and under target', async ({ page }) => {
-	// 3 images 3000×2000 en mode budget : plusieurs encodages chacune → peut dépasser
-	// le timeout Playwright par défaut (30 s) sur une CI fraîche.
+	// 3 images 3000×2000 in budget mode: several encodings each → can exceed
+	// the default Playwright timeout (30 s) on a fresh CI.
 	test.setTimeout(240_000);
 	await page.goto('/');
 
@@ -14,8 +14,8 @@ test('budget mode on 3 large images: fast and under target', async ({ page }) =>
 			const canvas = new OffscreenCanvas(w, h);
 			const ctx = canvas.getContext('2d')!;
 			const img = ctx.createImageData(w, h);
-			// dégradé + bruit léger : compressible (le budget peut atteindre la cible)
-			// mais assez riche pour forcer plusieurs encodages.
+			// gradient + light noise: compressible (the budget can reach the target)
+			// but rich enough to force several encodings.
 			for (let y = 0; y < h; y++) {
 				for (let x = 0; x < w; x++) {
 					const i = (y * w + x) * 4;
@@ -65,9 +65,9 @@ test('budget mode on 3 large images: fast and under target', async ({ page }) =>
 	console.log('perf report:', report);
 
 	for (const r of report) {
-		expect(r.width).toBe(3000); // pas de resize demandé
+		expect(r.width).toBe(3000); // no resize requested
 		expect(r.qualityUsed).toBeDefined();
 		expect(r.outputSize).toBeLessThanOrEqual(150 * 1024 * 1.1); // la plus grosse cible (150 Ko)
-		expect(r.elapsedMs).toBeLessThan(30_000); // généreux pour CI
+		expect(r.elapsedMs).toBeLessThan(30_000); // generous for CI
 	}
 });

@@ -7,7 +7,7 @@ export interface PipelineOptions extends Partial<EncodeOptions> {
 	fit?: FitMode; // default 'contain'
 	maxWidth?: number; // px
 	maxHeight?: number; // px
-	maxWeightKB?: number; // mode taille cible : bissection qualité
+	maxWeightKB?: number; // target-size mode: quality bisection
 }
 
 export interface PipelineInput {
@@ -21,20 +21,20 @@ export interface PipelineResult {
 	mime: string;
 	width: number;
 	height: number;
-	inputSize: number; // octets
-	outputSize: number; // octets
-	qualityUsed?: number; // défini en mode taille cible
+	inputSize: number; // bytes
+	outputSize: number; // bytes
+	qualityUsed?: number; // set in target-size mode
 }
 
 export const LIMITS = {
 	maxDimension: 24_000,
-	maxPixels: 150_000_000, // 150 MP → ~600 Mo RGBA (plafond mémoire pic)
+	maxPixels: 150_000_000, // 150 MP → ~600 MB RGBA (peak memory cap)
 	maxFileBytes: 100 * 1024 * 1024,
 	stepDownThreshold: 8_000,
 	qualityMin: 20,
 	qualityMax: 95,
 	targetIterations: 6,
-	targetTolerance: 0.1 // +10 % de dépassement toléré
+	targetTolerance: 0.1 // +10 % allowed overshoot
 } as const;
 
 export interface ValidationResult {

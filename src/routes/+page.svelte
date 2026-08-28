@@ -74,7 +74,7 @@
 
 	function launch(): void {
 		if (!controller) return;
-		// Les réglages sont appliqués AU MOMENT du lancement (et non au drop).
+		// Settings are applied AT LAUNCH time (not at drop time).
 		controller.start(toPipelineOptions(settings));
 	}
 
@@ -119,7 +119,7 @@
 		controller?.removeJob(id);
 	}
 
-	// Persistance automatique des réglages (localStorage) — $effect n'existe que dans un composant
+	// Auto-persist settings (localStorage) — $effect only exists inside a component
 	$effect(() => {
 		saveSettings(settings);
 	});
@@ -262,7 +262,7 @@
 		flex-direction: column;
 	}
 
-	/* --- Header sticky --- */
+	/* --- Sticky header --- */
 	.topbar {
 		position: sticky;
 		top: 0;
@@ -326,7 +326,7 @@
 		color: var(--accent-ink);
 	}
 
-	/* --- Contenu --- */
+	/* --- Content --- */
 	.main {
 		width: 100%;
 		max-width: 1280px;
@@ -337,7 +337,7 @@
 		gap: 24px;
 	}
 
-	/* --- Bandeau fichiers rejetés --- */
+	/* --- Rejected files banner --- */
 	.banner {
 		display: flex;
 		align-items: flex-start;
@@ -371,7 +371,7 @@
 		color: var(--warn-text);
 	}
 
-	/* --- Layout settings + file --- */
+	/* --- Settings + queue layout --- */
 	.layout {
 		display: grid;
 		grid-template-columns: 320px 1fr;
@@ -385,7 +385,7 @@
 		gap: 16px;
 	}
 
-	/* --- Barre d'actions --- */
+	/* --- Action bar --- */
 	.actionbar {
 		position: sticky;
 		top: 64px;
@@ -406,7 +406,7 @@
 		color: var(--text-3);
 	}
 
-	/* --- Grille de cartes --- */
+	/* --- Cards grid --- */
 	.grid {
 		display: grid;
 		grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -414,7 +414,7 @@
 		align-items: start;
 	}
 
-	/* --- État vide --- */
+	/* --- Empty state --- */
 	.empty {
 		display: flex;
 		flex-direction: column;

@@ -1,12 +1,12 @@
 #!/bin/sh
 set -e
 
-# Basic auth optionnelle — pattern Mazanoke : si USERNAME ET PASSWORD sont renseignés,
-# le shell SPA est protégé. Les assets restent publics : l'app est 100% client-side,
-# aucune donnée utilisateur ne transite par le serveur (PLAN §1).
+# Optional basic auth — Mazanoke pattern: if USERNAME AND PASSWORD are set,
+# the SPA shell is protected. Assets stay public: the app is 100% client-side,
+# no user data transits through the server.
 #
-# Note : la protection s'applique au shell /index.html, qui est aussi la cible des
-# redirections SPA (try_files) → toutes les navigations passent par l'auth.
+# Note: the protection applies to the /index.html shell, which is also the target
+# of the SPA redirects (try_files) → all navigations go through auth.
 
 if [ -n "$USERNAME" ] && [ -n "$PASSWORD" ]; then
   echo "Pictiúr: enabling basic auth for '$USERNAME'"

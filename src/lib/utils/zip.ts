@@ -8,7 +8,7 @@ export interface ZipEntry {
 const stripUnsafe = (name: string): string =>
 	name.replaceAll('\\', '_').replaceAll('/', '_').slice(0, 120);
 
-/** Noms uniques : 'a.jpg', 'a (2).jpg', 'a (3).jpg'… */
+/** Unique names: 'a.jpg', 'a (2).jpg', 'a (3).jpg'… */
 function uniqueName(name: string, seen: Map<string, number>): string {
 	const count = seen.get(name) ?? 0;
 	seen.set(name, count + 1);
@@ -26,7 +26,7 @@ export async function buildZip(entries: ZipEntry[]): Promise<Blob> {
 		const name = uniqueName(stripUnsafe(entry.name), seen);
 		files[name] = new Uint8Array(await entry.blob.arrayBuffer());
 	}
-	// level 0 (store) : les entrées sont déjà compressées (JPEG/PNG/WebP/AVIF/JXL),
-	// re-compresser au niveau 6 coûte du CPU pour ~0 % de gain sur le main thread.
+	// level 0 (store): entries are already compressed (JPEG/PNG/WebP/AVIF/JXL),
+	// re-compressing at level 6 wastes CPU for ~0 % gain on the main thread.
 	return new Blob([zipSync(files, { level: 0 })], { type: 'application/zip' });
 }

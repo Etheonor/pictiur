@@ -8,7 +8,7 @@ export {
 	type Settings
 } from './settings';
 
-// État réactif global (runes Svelte 5)
+// Global reactive state (Svelte 5 runes)
 export const settings = $state<Settings>(loadSettings());
 
 export function updateSettings(patch: Partial<Settings>): void {

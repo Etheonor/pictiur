@@ -1,6 +1,6 @@
 import type { WorkerJob, WorkerResponse } from './codec.worker';
 
-/** Contrat du worker, minimal et mockable en test. */
+/** Worker contract, minimal and mockable in tests. */
 export interface PoolWorker {
 	postMessage(message: unknown, transfer?: Transferable[]): void;
 	onmessage: ((event: { data: unknown }) => void) | null;
@@ -45,7 +45,7 @@ export class WorkerPool {
 		});
 	}
 
-	/** Un worker a planté (WASM OOM, etc.) : rejette ses jobs en vol et le remplace. */
+	/** A worker crashed (WASM OOM, etc.): reject its in-flight jobs and replace it. */
 	private onWorkerError(index: number, event: unknown): void {
 		console.error('Pictiúr: worker crashed, restarting slot', index, event);
 		for (const [id, record] of [...this.inflight]) {

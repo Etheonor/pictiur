@@ -17,7 +17,7 @@ export interface QueueJobResult {
 export interface QueueJob {
 	id: string;
 	name: string;
-	format: string; // codec cible (label affiché pendant le traitement)
+	format: string; // target codec (label shown while processing)
 	inputSize: number;
 	status: JobStatus;
 	progress: number; // 0-100
@@ -32,7 +32,7 @@ export interface QueueJobInput {
 	options: PipelineOptions;
 }
 
-/** L'interface que le contrôleur attend du pool (la vraie implémentation est la Phase 2). */
+/** The interface the controller expects from the pool (the real implementation is Phase 2). */
 export interface QueuePool {
 	submit(args: {
 		payload: WorkerJob;
@@ -68,8 +68,8 @@ export class JobQueueController {
 	}
 
 	/**
-	 * Met des fichiers en attente ('ready') SANS les traiter : on peut en ajouter
-	 * un par un et ajuster les réglages. `start()` lance réellement le traitement.
+	 * Stages files as ready ('ready') WITHOUT processing them: you can add them
+	 * one by one and adjust the settings. `start()` actually runs the processing.
 	 */
 	add(inputs: QueueJobInput[]): string[] {
 		const ids: string[] = [];
@@ -92,8 +92,8 @@ export class JobQueueController {
 	}
 
 	/**
-	 * Lance le traitement de tous les fichiers en attente.
-	 * @param options réglages appliqués AU MOMENT du lancement (surchargent ceux du drop).
+	 * Starts processing all pending files.
+	 * @param options settings applied AT launch time (override the drop-time ones).
 	 */
 	start(options?: PipelineOptions): void {
 		for (const job of this.jobs) {
@@ -156,7 +156,7 @@ export class JobQueueController {
 			if (job.status === 'ready') job.status = 'aborted';
 		}
 		for (const controller of this.abortControllers.values()) controller.abort();
-		// la promesse rejetée marque chaque job en vol 'aborted' via son catch
+		// the rejected promise marks each in-flight job 'aborted' via its catch
 		this.notify();
 	}
 

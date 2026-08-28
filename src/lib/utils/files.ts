@@ -13,7 +13,7 @@ export interface RejectedFile {
 	reason: 'unsupported' | 'tooLarge';
 }
 
-// Formats lisibles par createImageBitmap (v1, PLAN §2 « Couverture des formats »)
+// Formats readable by createImageBitmap (v1, PLAN §2 "Format coverage")
 export const INPUT_MIMES = new Set([
 	'image/jpeg',
 	'image/png',
@@ -78,8 +78,8 @@ export function toPipelineOptions(settings: {
 	fit: 'contain' | 'cover' | 'fill';
 	maxWeightKB: number;
 }): PipelineOptions {
-	// Le budget (poids max) est sans effet sur PNG : oxipng ignore la qualité.
-	// PNG passe donc toujours en qualité fixe (garde-fou).
+	// The budget (max weight) has no effect on PNG: oxipng ignores quality.
+	// PNG therefore always runs at a fixed quality (safety net).
 	const weight = settings.compressMode === 'weight' && settings.targetFormat !== 'png';
 	return {
 		targetFormat: settings.targetFormat,

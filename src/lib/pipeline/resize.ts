@@ -7,7 +7,7 @@ import type { FitMode } from './job';
 export interface ResizePlan {
 	width: number;
 	height: number;
-	/** cover uniquement : recadrage centré après resize */
+	/** cover only: centered crop after resize */
 	crop?: { width: number; height: number };
 }
 
@@ -15,8 +15,8 @@ const isFiniteNum = (n: number | undefined): n is number =>
 	typeof n === 'number' && Number.isFinite(n);
 
 /**
- * Calcule le plan de resize SANS upscale : renvoie null si l'image
- * tient déjà dans la boîte (aucun redimensionnement nécessaire).
+ * Computes the resize plan WITHOUT upscaling: returns null if the image
+ * already fits in the box (no resize needed).
  */
 export function planResize(
 	input: { width: number; height: number },
@@ -37,7 +37,7 @@ export function planResize(
 	}
 
 	if (fit === 'cover' && isFiniteNum(maxWidth) && isFiniteNum(maxHeight)) {
-		// Couvre la boîte (débordement) puis crop centré au target.
+		// Cover the box (overflow) then center-crop to the target.
 		const targetRatio = maxWidth / maxHeight;
 		let width = input.width;
 		let height = input.height;
@@ -55,7 +55,7 @@ export function planResize(
 		};
 	}
 
-	// contain (défaut) : l'image s'inscrit dans la boîte, ratio conservé
+	// contain (default): the image fits in the box, ratio preserved
 	let width = input.width;
 	let height = input.height;
 	if (width > mw) {
@@ -70,9 +70,9 @@ export function planResize(
 }
 
 /**
- * Étapes intermédiaires du resize pyramidal : on divise par 2 jusqu'à
- * être à ≤ 2× de la cible, pour ne jamais détériorer brutalement
- * (et limiter la mémoire pic) sur les très grandes images.
+ * Intermediate steps of the pyramidal resize: divide by 2 until
+ * within ≤ 2× of the target, to never degrade sharply
+ * (and limit peak memory) on very large images.
  */
 export function buildResizeSteps(
 	from: { width: number; height: number },
@@ -97,7 +97,7 @@ export async function resizeRgba(rgba: RGBA, width: number, height: number): Pro
 	const out = await resize(createImageData(rgba), {
 		width,
 		height,
-		method: 'lanczos3' // kernel haute qualité (défaut du package, explicite ici)
+		method: 'lanczos3' // high-quality kernel (package default, made explicit here)
 	});
 	return fromImageData(out);
 }

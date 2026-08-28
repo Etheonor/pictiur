@@ -4,8 +4,8 @@
 
 	let { children } = $props();
 
-	// Le manifest + le service worker n'existent qu'en build (vite-plugin-pwa) :
-	// en dev ils 404 → on ne les référence/enregistre pas.
+	// The manifest + service worker only exist in build (vite-plugin-pwa):
+	// in dev they 404 → not referenced/registered.
 	if (browser && !dev && 'serviceWorker' in navigator) {
 		navigator.serviceWorker.register('/sw.js');
 	}

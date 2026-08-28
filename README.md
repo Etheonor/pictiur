@@ -13,45 +13,54 @@ pnpm install
 pnpm dev
 ```
 
-## Usage (self-hosted)
+## Deployment
 
-La façon la plus simple — image Docker officielle :
+Pictiúr is a fully static app (adapter-static) — any static host works.
+
+### Docker (self-hosted / Coolify)
+
+Simplest way — official Docker image:
 
 ```bash
 docker run -d --name pictiur -p 3002:80 ghcr.io/etheonor/pictiur:latest
 ```
 
-Avec protection par mot de passe :
+With password protection:
 
 ```bash
 docker run -d --name pictiur -p 3002:80 \
-  -e USERNAME=admin -e PASSWORD=motdepasse \
+  -e USERNAME=admin -e PASSWORD=your-password \
   ghcr.io/etheonor/pictiur:latest
 ```
 
-Ou en docker-compose : voir `docker-compose.yml`.
-Déploiement Coolify : voir « Déploiement » plus bas.
+Or with docker-compose — see `docker-compose.yml` (builds locally from the Dockerfile by default).
 
-## Déploiement (Coolify)
+**Coolify deploy steps:**
 
-1. **+ Nouveau → Docker Image**
-2. **Image** : `ghcr.io/etheonor/pictiur:latest`
-3. **Domaine** : ex. `https://px.example.com` _(route Traefik + certificat Let's Encrypt automatiques)_
-4. **Ports Exposes** : `80` _(indispensable : sans lui, le proxy ne sait pas où router)_
-5. **Variables d'environnement** (optionnel — pour protéger l'instance) :
+1. **+ New → Docker Image**
+2. **Image**: `ghcr.io/etheonor/pictiur:latest`
+3. **Domain**: e.g. `https://px.example.com` _(Traefik route + automatic Let's Encrypt certificate)_
+4. **Ports Exposes**: `80` _(required — without it the proxy doesn't know where to route)_
+5. **Environment variables** (optional — to protect the instance):
 
    ```
    USERNAME=admin
-   PASSWORD=<mot-de-passe>
+   PASSWORD=<your-password>
    ```
 
-   _(laisser vide pour une démo publique sans login)_
+   _(leave empty for a public demo without login)_
 
 6. **Deploy**
 
-⚠️ **Pièges Coolify** : ne **pas** renseigner _Ports Exposes_ → 503 au premier essai. Si l'image
-ghcr.io est privée : réglages du serveur → registres (token `read:packages`) ou rends le paquet
-public (Packages → Make public).
+⚠️ **Coolify pitfalls**: do **not** leave _Ports Exposes_ empty → 503 on first attempt. If the
+ghcr.io image is private: server settings → registries (token `read:packages`) or make the
+package public (Packages → Make public).
+
+### Cloudflare Pages
+
+The repo builds with **framework preset: Static**, build command
+`pnpm install --frozen-lockfile && pnpm build`, output directory `build`.
+`static/_redirects` (SPA fallback) and `static/_headers` (security headers) are included.
 
 ## License
 

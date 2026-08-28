@@ -60,7 +60,7 @@ describe('JobQueueController', () => {
 		const [id] = controller.add([input('a.png')]);
 		const job = () => controller.jobs.find((j) => j.id === id)!;
 
-		// Le drop ne lance RIEN : le fichier est en attente
+		// The drop runs NOTHING: the file is just staged
 		expect(job().status).toBe('ready');
 		expect(pool.submitted).toHaveLength(0);
 
@@ -70,15 +70,15 @@ describe('JobQueueController', () => {
 		expect(job().result?.width).toBe(10);
 		expect(job().result?.url).toBeTruthy();
 		expect(job().progress).toBe(100);
-		// les jobs terminés restent listés (téléchargement individuel)
+		// finished jobs stay listed (individual download)
 		expect(controller.jobs).toHaveLength(1);
 	});
 
 	it('applies launch-time options over the drop-time ones', async () => {
 		const pool = new FakePool(0);
 		const controller = new JobQueueController({ pool: pool as never });
-		controller.add([input('a.png', 'webp')]); // réglage au drop
-		controller.start({ targetFormat: 'jpeg', quality: 80 }); // réglage au lancement
+		controller.add([input('a.png', 'webp')]); // drop-time setting
+		controller.start({ targetFormat: 'jpeg', quality: 80 }); // launch-time setting
 		await vi.waitFor(() => expect(pool.submitted).toHaveLength(1));
 		expect(pool.submitted[0].options).toMatchObject({ targetFormat: 'jpeg', quality: 80 });
 	});
@@ -96,10 +96,10 @@ describe('JobQueueController', () => {
 		const pool = new FakePool(50);
 		const controller = new JobQueueController({ pool: pool as never });
 		controller.add([input('a.png'), input('b.png')]);
-		controller.abortAll(); // fichiers jamais lancés → aborted directement
+		controller.abortAll(); // files never started → aborted immediately
 		await vi.waitFor(() => expect(controller.jobs.every((j) => j.status === 'aborted')).toBe(true));
 
-		// aborted en cours de traitement
+		// aborted while processing
 		controller.add([input('c.png')]);
 		controller.start();
 		await vi.waitFor(() => expect(controller.jobs[2].status).toBe('processing'));
@@ -116,7 +116,7 @@ describe('JobQueueController', () => {
 		});
 		controller.add([input('done.png')]);
 		controller.start({ targetFormat: 'webp' });
-		// fichier ajouté APRÈS le lancement → reste en attente
+		// file added AFTER launch → stays staged
 		controller.add([input('pending.png')]);
 		await vi.waitFor(() => expect(controller.jobs[0].status).toBe('done'));
 		expect(controller.jobs[1].status).toBe('ready');
@@ -131,7 +131,7 @@ describe('JobQueueController', () => {
 		const revoke = vi.fn();
 		const controller = new JobQueueController({ pool: pool as never, revokeObjectUrl: revoke });
 		controller.add([input('staged.png'), input('done.png')]);
-		controller.removeJob(controller.jobs[0].id); // fichier jamais lancé
+		controller.removeJob(controller.jobs[0].id); // file never launched
 		expect(controller.jobs).toHaveLength(1);
 		controller.start();
 		await vi.waitFor(() => expect(controller.jobs[0].status).toBe('done'));

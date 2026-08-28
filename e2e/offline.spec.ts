@@ -1,18 +1,18 @@
 import { expect, test } from '@playwright/test';
 
 test('app is installable and works fully offline', async ({ page }) => {
-	// 1) première visite : l'app se charge, le SW s enregistre et contrôle la page
+	// 1) first visit: the app loads, the SW registers and controls the page
 	await page.goto('/');
 	await page.evaluate(() => navigator.serviceWorker.ready);
 	await page.waitForFunction(() => navigator.serviceWorker.controller !== null);
 
-	// 2) installation : manifest présent dans le DOM
+	// 2) installable: manifest present in the DOM
 	const manifest = await page.evaluate(() =>
 		document.querySelector('link[rel="manifest"]')?.getAttribute('href')
 	);
 	expect(manifest).toBeTruthy();
 
-	// attendre que le precache soit réellement rempli (téléchargement des .wasm)
+	// wait until the precache is actually filled (wasm downloads)
 	await page.waitForFunction(
 		async () => {
 			const keys = await caches.keys();
@@ -26,11 +26,11 @@ test('app is installable and works fully offline', async ({ page }) => {
 		{ timeout: 60_000 }
 	);
 
-	// un reload en ligne pour que cette navigation soit contrôlée par le SW
+	// an online reload so this navigation is controlled by the SW
 	await page.reload();
 	await page.waitForFunction(() => navigator.serviceWorker.controller !== null);
 
-	// 3) couper le réseau → recharger → TOUJOURS debout
+	// 3) cut the network → reload → STILL standing
 	const context = page.context();
 	await context.setOffline(true);
 	await page.reload();

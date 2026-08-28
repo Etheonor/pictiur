@@ -25,7 +25,7 @@ function createBrowserWorker(): PoolWorker {
 	};
 }
 
-/** Pool réel pour le navigateur : N = cores - 1 (PLAN §3.3). */
+/** Real browser pool: N = cores - 1 (PLAN §3.3). */
 export function createBrowserPool(size?: number): WorkerPool {
 	const cores = typeof navigator !== 'undefined' ? navigator.hardwareConcurrency || 2 : 2;
 	return new WorkerPool(size ?? Math.max(1, cores - 1), createBrowserWorker);

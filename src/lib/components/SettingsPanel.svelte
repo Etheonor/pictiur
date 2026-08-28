@@ -12,7 +12,7 @@
 	function onFormatChange(value: string): void {
 		updateSettings({
 			targetFormat: value,
-			// PNG (lossless) n'a pas de mode budget → on bascule en qualité fixe
+			// PNG (lossless) has no budget mode → switch to fixed quality
 			...(value === 'png' && settings.compressMode === 'weight' ? { compressMode: 'quality' } : {})
 		});
 	}

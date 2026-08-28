@@ -63,7 +63,7 @@ describe('WorkerPool', () => {
 		maxInFlight = 0;
 		const workers = [new FakeWorker(5), new FakeWorker(5)];
 		const pool = new WorkerPool(2, () => workers[Math.min(workerSeq - 1, 1)]);
-		// 5 jobs soumis : jamais plus de `size` jobs en vol à la fois
+		// 5 jobs submitted: never more than `size` jobs in flight at once
 		const results = await Promise.allSettled(
 			[1, 2, 3, 4, 5].map((i) => pool.submit({ payload: job(`a${i}`) }))
 		);
@@ -97,12 +97,12 @@ describe('WorkerPool', () => {
 
 	it('aborts queued and in-flight jobs', async () => {
 		const worker = new FakeWorker(10);
-		const pool = new WorkerPool(1, () => worker); // 1 seul slot → le 2e job reste en queue
+		const pool = new WorkerPool(1, () => worker); // single slot → the 2nd job stays queued
 		const ac1 = new AbortController();
 		const ac2 = new AbortController();
 		const p1 = pool.submit({ payload: job('q1'), signal: ac1.signal });
 		const p2 = pool.submit({ payload: job('q2'), signal: ac2.signal });
-		ac2.abort(); // q2 est en queue → rejet immédiat
+		ac2.abort(); // q2 is queued → immediate rejection
 		await expect(p2).rejects.toThrow('ABORTED');
 		const r1 = await p1;
 		expect(r1.kind).toBe('result');
@@ -116,7 +116,7 @@ describe('WorkerPool', () => {
 	});
 
 	it('respawns a crashed worker and rejects its in-flight job', async () => {
-		// Worker qui ne répond jamais mais peut "planter" (WASM OOM) → onerror.
+		// Worker that never responds but can "crash" (WASM OOM) → onerror.
 		class CrashWorker implements PoolWorker {
 			onmessage: ((event: { data: unknown }) => void) | null = null;
 			onerror: ((event: unknown) => void) | null = null;
@@ -146,7 +146,7 @@ describe('WorkerPool', () => {
 		await expect(p1).rejects.toThrow('WORKER_CRASH');
 		expect(crasher.terminated).toBe(true);
 
-		// Le slot a été recréé : le pool continue de fonctionner.
+		// The slot was recreated: the pool keeps working.
 		const r2 = await pool.submit({ payload: job('after') });
 		expect(r2.kind).toBe('result');
 		expect(replacement.terminated).toBe(false);

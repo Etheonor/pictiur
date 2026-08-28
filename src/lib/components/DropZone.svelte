@@ -11,7 +11,7 @@
 	function pick(event: Event): void {
 		const input = event.target as HTMLInputElement;
 		if (input.files?.length) onFiles(input.files);
-		input.value = ''; // permet de re-sélectionner le même fichier
+		input.value = ''; // allows re-selecting the same file
 	}
 
 	function drop(event: DragEvent): void {

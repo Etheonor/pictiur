@@ -24,8 +24,8 @@ const baseEnv = (codec: Codec, image: RGBA) => ({
 	getCodec: vi.fn(async () => codec)
 });
 
-describe('garde-fous mémoire', () => {
-	it('rejette au-delà de maxPixels (sans allouer)', async () => {
+describe('memory guards', () => {
+	it('rejects beyond maxPixels (without allocating)', async () => {
 		const codec = fakeCodec();
 		const e = baseEnv(codec, fakeRgba(20_000, 20_000)); // 400 MP
 		await expect(
@@ -42,8 +42,8 @@ describe('garde-fous mémoire', () => {
 	});
 });
 
-describe('annulation coopérative', () => {
-	it('stoppe dès la fin du decode (encode non appelé)', async () => {
+describe('cooperative cancellation', () => {
+	it('stops right after decode (encode not called)', async () => {
 		const codec = fakeCodec();
 		let cancelled = false;
 		const e = { ...baseEnv(codec, fakeRgba(8, 8)), shouldCancel: () => cancelled };
@@ -56,10 +56,10 @@ describe('annulation coopérative', () => {
 		expect(codec.encode).not.toHaveBeenCalled();
 	});
 
-	it('stoppe pendant la boucle budget (pas de probe supplémentaire)', async () => {
+	it('stops during the budget loop (no extra probe)', async () => {
 		let cancelled = false;
 		const encode = vi.fn(async () => {
-			cancelled = true; // la 1re probe déclenche l'annulation
+			cancelled = true; // the 1st probe triggers the cancellation
 			return new Blob([new Uint8Array(100)]);
 		});
 		const codec: Codec = { ...fakeCodec(), encode: encode as never };
@@ -74,6 +74,6 @@ describe('annulation coopérative', () => {
 				e
 			)
 		).rejects.toThrow('ABORTED');
-		expect(encode).toHaveBeenCalledTimes(1); // pas de 2e probe après cancel
+		expect(encode).toHaveBeenCalledTimes(1); // no 2nd probe after cancel
 	});
 });

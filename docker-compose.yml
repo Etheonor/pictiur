@@ -1,5 +1,9 @@
 services:
   pictiur:
+    # Build locally from the Dockerfile (no need to publish the image).
+    # To use the published image (CI → ghcr.io/etheonor/pictiur:latest) instead, replace with:
+    #   image: ghcr.io/etheonor/pictiur:latest
+    # and remove the `build` block.
     build: .
     image: pictiur:local
     container_name: pictiur
@@ -7,6 +11,6 @@ services:
     ports:
       - '3002:80'
     environment:
-      # Auth basique optionnelle : laisser vide = accès libre
+      # Optional basic auth: leave empty = open access
       - USERNAME=
       - PASSWORD=

@@ -9,7 +9,7 @@ class FakeWorker implements PoolWorker {
 	postMessage(message: unknown): void {
 		this.messages.push(message);
 		const job = message as { id: string };
-		// répond comme un worker qui tourne encore
+		// reply like a worker that is still running
 		setTimeout(() => {
 			this.onmessage?.({
 				data: {
@@ -28,7 +28,7 @@ class FakeWorker implements PoolWorker {
 }
 
 describe('pool → cancel message', () => {
-	it('envoie {kind:"cancel"} au worker d un job annulé en vol', async () => {
+	it('sends {kind:"cancel"} to the worker of an in-flight cancelled job', async () => {
 		const worker = new FakeWorker();
 		const pool = new WorkerPool(1, () => worker);
 		const ac = new AbortController();
@@ -41,7 +41,7 @@ describe('pool → cancel message', () => {
 			},
 			signal: ac.signal
 		});
-		await new Promise((r) => setTimeout(r, 5)); // laisse le job être dispatché
+		await new Promise((r) => setTimeout(r, 5)); // let the job get dispatched
 		ac.abort();
 		await expect(p).rejects.toThrow('ABORTED');
 		await new Promise((r) => setTimeout(r, 50));

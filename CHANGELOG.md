@@ -4,11 +4,11 @@
 
 ### Added
 
-- Optimiseur d'images 100 % local (WebAssembly, aucun upload)
-- Formats : JPEG (mozjpeg), PNG (oxipng), WebP, AVIF, JPEG XL
-- Resize (contain/cover/fill), qualité fixe, taille cible en Ko
-- Batch multi-fichiers : progression, annulation, export ZIP
-- Comparaison avant/après
-- PWA installable et fonctionnelle hors-ligne
-- i18n français/anglais
-- Licence MIT, docs complètes, CI, image Docker officielle
+- 100% local image optimizer (WebAssembly, no upload)
+- Formats: JPEG (mozjpeg), PNG (oxipng), WebP, AVIF, JPEG XL
+- Resize (contain/cover/fill), fixed quality, target size in KB
+- Multi-file batch: progress, cancellation, ZIP export
+- Before/after comparison
+- Installable PWA, fully functional offline
+- FR/EN localization
+- MIT license, complete docs, CI, official Docker image

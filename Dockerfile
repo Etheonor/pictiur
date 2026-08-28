@@ -9,7 +9,7 @@ RUN pnpm install --frozen-lockfile
 COPY . .
 RUN pnpm build
 
-# ---- Runtime : nginx statique, un seul conteneur (Coolify-ready) ----
+# ---- Runtime: static nginx, single container (Coolify-ready) ----
 FROM nginx:alpine
 RUN apk add --no-cache apache2-utils
 COPY docker/nginx.conf /etc/nginx/conf.d/default.conf

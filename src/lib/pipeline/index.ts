@@ -8,18 +8,18 @@ import { buildResizeSteps, centerCrop, planResize, resizeRgba } from './resize';
 import { encodeToTarget } from './target-size';
 
 export interface PipelineEnv {
-	/** Décode un Blob en RGBA (défaut : createImageBitmap + OffscreenCanvas, navigateur/worker). */
+	/** Decodes a Blob to RGBA (default: createImageBitmap + OffscreenCanvas, browser/worker). */
 	decode?: (blob: Blob) => Promise<RGBA>;
-	/** Resize RGBA (défaut : @jsquash/resize, lanczos3). Injectable pour les tests. */
+	/** Resizes RGBA (default: @jsquash/resize, lanczos3). Injectable for tests. */
 	resize?: (rgba: RGBA, width: number, height: number) => Promise<RGBA>;
-	/** Résout un codec par id (défaut : registre réel). */
+	/** Resolves a codec by id (default: real registry). */
 	getCodec?: (id: string) => Promise<Codec | undefined>;
 	onProgress?: (progress: number) => void;
-	/** Annulation coopérative — vérifiée ENTRE les étapes LOURDES (decode/resize/encode). */
+	/** Cooperative cancellation — checked BETWEEN the HEAVY steps (decode/resize/encode). */
 	shouldCancel?: () => boolean;
 }
 
-/** Décode natif navigateur/worker : applique l'orientation EXIF (from-image). */
+/** Native browser/worker decode: applies EXIF orientation (from-image). */
 export async function decodeInBrowser(
 	blob: Blob,
 	resolveCodec: (id: string) => Promise<Codec | undefined> = getCodec
@@ -37,8 +37,8 @@ export async function decodeInBrowser(
 			bitmap.close();
 		}
 	} catch {
-		// Fallback WASM (PLAN §3.4) : createImageBitmap échoue pour certains formats
-		// (ex. AVIF sur vieux navigateurs, JXL hors Safari). On tente le décodeur natif.
+		// WASM fallback (PLAN §3.4): createImageBitmap fails for some formats
+		// (e.g. AVIF on old browsers, JXL outside Safari). Try the native decoder.
 		const id = codecIdFromMime(blob.type);
 		const codec = id ? await resolveCodec(id) : undefined;
 		if (codec?.decode) return codec.decode(await blob.arrayBuffer());
@@ -77,7 +77,7 @@ export async function runPipeline(
 	ensureActive();
 	const inputSize = input.file.size;
 
-	// resize (plan + pyramidal)
+	// resize (plan + pyramidal steps)
 	const options = resolveOptions(input.options);
 	const plan = planResize(source, options.fit, options.maxWidth, options.maxHeight);
 	onProgress(30);
@@ -96,7 +96,7 @@ export async function runPipeline(
 		onProgress(60);
 	}
 
-	// encode (simple ou budget)
+	// encode (plain or budget)
 	ensureActive();
 	onProgress(65);
 	const codec = await resolveCodec(options.targetFormat);

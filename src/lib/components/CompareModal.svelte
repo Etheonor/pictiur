@@ -29,7 +29,7 @@
 		return () => window.removeEventListener('keydown', onKey);
 	});
 
-	// Verrouille le scroll du body pendant la modale
+	// Locks the body scroll while the modal is open
 	$effect(() => {
 		const prev = document.body.style.overflow;
 		document.body.style.overflow = 'hidden';
@@ -88,9 +88,17 @@
 			onpointerup={onPointerUp}
 			onpointercancel={onPointerUp}
 		>
-			<img class="stage__img stage__img--before" src={inputUrl} alt={`${job.name} (avant)`} />
+			<img
+				class="stage__img stage__img--before"
+				src={inputUrl}
+				alt={`${job.name} (${t(settings.lang, 'compare.before').toLowerCase()})`}
+			/>
 			<div class="stage__after" style="clip-path: inset(0 0 0 {pos}%);">
-				<img class="stage__img" src={result.url} alt={`${job.name} (après)`} />
+				<img
+					class="stage__img"
+					src={result.url}
+					alt={`${job.name} (${t(settings.lang, 'compare.after').toLowerCase()})`}
+				/>
 			</div>
 			<div class="handle" style="left: {pos}%;">
 				<ChevronsLeftRight size={16} strokeWidth={2} aria-hidden="true" />

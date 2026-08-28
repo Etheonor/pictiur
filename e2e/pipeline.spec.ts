@@ -76,9 +76,9 @@ test('worker pool: 5 images through the real pipeline', async ({ page }) => {
 
 	for (const r of report) {
 		expect(r.outputSize).toBeGreaterThan(0);
-		expect(r.outputSize).toBeLessThan(r.inputSize); // les formats lossy rétrécissent le dégradé
+		expect(r.outputSize).toBeLessThan(r.inputSize); // lossy formats shrink the gradient
 	}
-	expect(report[1].width).toBe(400); // maxWidth appliqué
+	expect(report[1].width).toBe(400); // maxWidth applied
 	expect(report[2].qualityUsed).toBeDefined(); // boucle budget
 	expect(report[2].outputSize).toBeLessThanOrEqual(60 * 1024 * 1.1);
 });

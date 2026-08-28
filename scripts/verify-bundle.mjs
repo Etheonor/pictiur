@@ -1,6 +1,6 @@
-// Vérifie la structure du build : wasm AVIF/JXL émis séparément (lazy), entry raisonnable.
-// Usage : pnpm verify:bundle   (après pnpm build)
-// Adapté à la structure SvelteKit/Rolldown : chunks nommés par hash, wasm dans _app/immutable.
+// Checks the build structure: AVIF/JXL wasm emitted separately (lazy), reasonable entry.
+// Usage: pnpm verify:bundle   (after pnpm build)
+// Adapted to the SvelteKit/Rolldown layout: chunks named by hash, wasm under _app/immutable.
 import { readdirSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 
@@ -12,7 +12,7 @@ const root = [join('build', 'client'), 'build'].find((p) => {
 	}
 });
 if (!root) {
-	console.error('build/ introuvable — lance `pnpm build` d abord.');
+	console.error('build/ not found — run `pnpm build` first.');
 	process.exit(1);
 }
 
@@ -29,38 +29,35 @@ function walk(dir, base = dir) {
 
 const files = walk(root);
 const wasm = files.filter((f) => f.endsWith('.wasm'));
-// Chunk d'entrée : fichiers sous le dossier `entry/`
+// Entry chunk: files under the `entry/` folder
 const entries = files.filter((f) => f.split('/').includes('entry') && f.endsWith('.js'));
 const entrySize = entries.reduce((n, f) => n + statSync(f).size, 0);
-// Chunks JS (hors worker dédié)
+// JS chunks (excluding the dedicated worker)
 const mainChunks = files.filter((f) => f.endsWith('.js') && !f.includes('/workers/'));
 
 const failures = [];
-// Preuve du lazy loading AVIF/JXL : leurs .wasm existent en fichiers séparés
-// (chargés à la demande, pas dans le bundle initial).
+// Proof of AVIF/JXL lazy loading: their .wasm exist as separate files
+// (loaded on demand, not in the initial bundle).
 const hasAvifWasm = wasm.some((f) => f.includes('avif'));
 const hasJxlWasm = wasm.some((f) => f.includes('jxl'));
-if (!hasAvifWasm) failures.push('wasm avif manquant — lazy import cassé');
-if (!hasJxlWasm) failures.push('wasm jxl manquant — lazy import cassé');
+if (!hasAvifWasm) failures.push('avif wasm missing — lazy import broken');
+if (!hasJxlWasm) failures.push('jxl wasm missing — lazy import broken');
 
 if (wasm.length === 0) {
-	// le glue a pu inliner les wasm en base64 : acceptable si aucun chunk géant
+	// the glue may have inlined the wasm as base64: acceptable if no giant chunk
 	const giant = mainChunks.filter((f) => statSync(f).size > 8 * 1024 * 1024);
 	if (giant.length) {
-		failures.push(
-			'wasm inlinés dans de gros chunks : ' + giant.map((f) => relative(root, f)).join(', ')
-		);
+		failures.push('wasm inlined in big chunks: ' + giant.map((f) => relative(root, f)).join(', '));
 	} else {
-		console.warn('⚠ aucun .wasm émis — glue inline accepté (chunks raisonnables).');
+		console.warn('⚠ no .wasm emitted — inline glue accepted (reasonable chunks).');
 	}
 }
-if (entrySize > 600_000)
-	failures.push(`entry chunk trop grosse : ${Math.round(entrySize / 1024)} Ko`);
+if (entrySize > 600_000) failures.push(`entry chunk too big: ${Math.round(entrySize / 1024)} KB`);
 
 if (failures.length) {
 	console.error('✗ BUNDLE', failures.join('\n'));
 	process.exit(1);
 }
 console.log(
-	`✓ bundle OK — ${wasm.length} .wasm (avif/jxl séparés), entry ${Math.round(entrySize / 1024)} Ko`
+	`✓ bundle OK — ${wasm.length} .wasm (avif/jxl separate), entry ${Math.round(entrySize / 1024)} KB`
 );

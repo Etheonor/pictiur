@@ -8,7 +8,7 @@ describe('initialQualityGuess', () => {
 	});
 
 	it('lowers the guess when the target is aggressive', () => {
-		// ratio 100× → beaucoup plus bas que ratio 2×
+		// 100× ratio → much lower than 2× ratio
 		const aggressive = initialQualityGuess(100_000_000, 1_000_000);
 		const gentle = initialQualityGuess(2_000_000, 1_000_000);
 		expect(aggressive).toBeLessThan(gentle);
@@ -20,7 +20,7 @@ describe('initialQualityGuess', () => {
 });
 
 describe('encodeWithinBudget avec quality initiale', () => {
-	// probe déterministe : taille = f(quality)
+	// deterministic probe: size = f(quality)
 	const probe = (quality: number) => {
 		const size = Math.max(50, Math.round(1_000_000 / quality));
 		return Promise.resolve({ quality, blob: new Blob([new Uint8Array(size)]), size });
@@ -35,8 +35,8 @@ describe('encodeWithinBudget avec quality initiale', () => {
 
 		const initial = 40;
 		const res = await encodeWithinBudget(spy, 50_000, { initialQuality: initial });
-		expect(calls[0]).toBe(initial); // l'estimation est la première probe
-		expect(calls.length).toBeLessThanOrEqual(6); // budget de probes respecté
+		expect(calls[0]).toBe(initial); // the estimate is the first probe
+		expect(calls.length).toBeLessThanOrEqual(6); // probe budget respected
 		expect(res.size).toBeLessThanOrEqual(50_000 * 1.1);
 	});
 
@@ -47,6 +47,6 @@ describe('encodeWithinBudget avec quality initiale', () => {
 			return probe(q);
 		}, 50_000);
 		expect(res.size).toBeLessThanOrEqual(50_000 * 1.1);
-		expect(calls[0]).toBe(Math.round((20 + 95) / 2)); // bissection classique
+		expect(calls[0]).toBe(Math.round((20 + 95) / 2)); // classic bisection
 	});
 });

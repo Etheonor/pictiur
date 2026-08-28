@@ -133,7 +133,7 @@
 		animation: fadeIn 0.2s var(--ease);
 	}
 
-	/* --- done : aperçu --- */
+	/* --- done: preview --- */
 	.preview {
 		aspect-ratio: 4 / 3;
 		background: var(--surface-dim);

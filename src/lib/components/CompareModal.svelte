@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { ChevronsLeftRight, Download, X } from '@lucide/svelte';
+	import { getCodec } from '$lib/codecs';
 	import { t } from '$lib/i18n';
 	import { settings } from '$lib/stores/settings.svelte';
 	import { formatBytes, outputFileName } from '$lib/utils/files';
@@ -11,6 +12,14 @@
 	const result = $derived(job.result!);
 	let pos = $state(50);
 	let stage: HTMLDivElement | undefined = $state();
+	// The raw input may not be renderable by <img> (e.g. HEIC): we lazily decode a PNG preview.
+	let beforeSrc = $state('');
+	let beforeDecoding = $state(false);
+	let beforeFailed = $state(false);
+
+	$effect(() => {
+		if (beforeSrc === '' && inputUrl) beforeSrc = inputUrl;
+	});
 
 	const beforeLabel = $derived(formatBytes(job.inputSize, settings.lang));
 	const afterLabel = $derived(formatBytes(result.outputSize, settings.lang));
@@ -18,6 +27,29 @@
 	const diff = $derived(Math.round(((job.inputSize - result.outputSize) / job.inputSize) * 100));
 	const gainLabel = $derived(improved ? `−${diff} %` : diff === 0 ? '−0 %' : `+${-diff} %`);
 	const filename = $derived(outputFileName(job.name, result.mime));
+
+	async function onBeforeError(): Promise<void> {
+		if (beforeDecoding || beforeFailed) return;
+		beforeDecoding = true;
+		try {
+			const buffer = await (await fetch(inputUrl)).arrayBuffer();
+			const codec = await getCodec('heic');
+			if (!codec?.decode) throw new Error('no decoder');
+			const rgba = await codec.decode(buffer);
+			const canvas = new OffscreenCanvas(rgba.width, rgba.height);
+			const ctx = canvas.getContext('2d');
+			if (!ctx) throw new Error('Canvas 2D context unavailable');
+			const img = new ImageData(rgba.width, rgba.height);
+			img.data.set(rgba.data);
+			ctx.putImageData(img, 0, 0);
+			const blob = await canvas.convertToBlob({ type: 'image/png' });
+			beforeSrc = URL.createObjectURL(blob);
+		} catch {
+			beforeFailed = true;
+		} finally {
+			beforeDecoding = false;
+		}
+	}
 
 	$effect(() => {
 		const onKey = (e: KeyboardEvent) => {
@@ -88,11 +120,18 @@
 			onpointerup={onPointerUp}
 			onpointercancel={onPointerUp}
 		>
-			<img
-				class="stage__img stage__img--before"
-				src={inputUrl}
-				alt={`${job.name} (${t(settings.lang, 'compare.before').toLowerCase()})`}
-			/>
+			{#if beforeFailed}
+				<div class="stage__fallback" role="img" aria-label={job.name}>
+					<small>{t(settings.lang, 'result.previewUnsupported')}</small>
+				</div>
+			{:else}
+				<img
+					class="stage__img stage__img--before"
+					src={beforeSrc}
+					alt={`${job.name} (${t(settings.lang, 'compare.before').toLowerCase()})`}
+					onerror={onBeforeError}
+				/>
+			{/if}
 			<div class="stage__after" style="clip-path: inset(0 0 0 {pos}%);">
 				<img
 					class="stage__img"
@@ -177,6 +216,21 @@
 	}
 	.stage__img--before {
 		background: var(--surface-dim);
+	}
+	.stage__fallback {
+		position: absolute;
+		inset: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: 16px;
+		text-align: center;
+		background: var(--surface-dim);
+	}
+	.stage__fallback small {
+		font-size: 12px;
+		color: var(--text-3);
+		max-width: 80%;
 	}
 	.stage__after {
 		position: absolute;

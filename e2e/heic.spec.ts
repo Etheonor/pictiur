@@ -44,3 +44,29 @@ test('resolves the heic codec and decodes to RGBA (direct API)', async ({ page }
 	expect(info.width).toBeGreaterThan(0);
 	expect(info.height).toBeGreaterThan(0);
 });
+
+test('comparison decodes the HEIC "before" preview (not broken)', async ({ page }) => {
+	await page.goto('/');
+	await page.locator('input[type="file"]').setInputFiles({
+		name: 'sample.heic',
+		mimeType: 'image/heic',
+		buffer: HEIC
+	});
+	await page.getByText(/Start processing \(1\)/).click();
+
+	const card = page.locator('article.result-card');
+	await expect(card).toHaveCount(1, { timeout: 60_000 });
+
+	await card.getByRole('button', { name: 'Compare' }).click();
+	await expect(page.locator('.stage__img--before')).toBeVisible();
+
+	// lazy HEIC decode → PNG preview: the before image must actually load
+	await page.waitForFunction(
+		() => {
+			const img = document.querySelector('.stage__img--before') as HTMLImageElement | null;
+			return img !== null && img.complete && img.naturalWidth > 0;
+		},
+		undefined,
+		{ timeout: 60_000 }
+	);
+});

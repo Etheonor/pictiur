@@ -39,7 +39,7 @@
 	<strong class="dropzone__title">{t(settings.lang, 'drop.hint')}</strong>
 	<small class="dropzone__hint">
 		{t(settings.lang, 'drop.browse')}
-		<span class="dropzone__formats">JPEG · PNG · WebP · GIF · SVG · BMP · AVIF</span>
+		<span class="dropzone__formats">JPEG · PNG · WebP · GIF · SVG · BMP · AVIF · HEIC/HEIF</span>
 	</small>
 </button>
 

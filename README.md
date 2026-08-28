@@ -56,12 +56,6 @@ Or with docker-compose — see `docker-compose.yml` (builds locally from the Doc
 ghcr.io image is private: server settings → registries (token `read:packages`) or make the
 package public (Packages → Make public).
 
-### Cloudflare Pages
-
-The repo builds with **framework preset: Static**, build command
-`pnpm install --frozen-lockfile && pnpm build`, output directory `build`.
-`static/_redirects` (SPA fallback) and `static/_headers` (security headers) are included.
-
 ## License
 
 MIT

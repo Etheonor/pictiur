@@ -12,6 +12,9 @@ export const translations: Record<Lang, Record<string, string>> = {
 		'settings.mode.weight': 'Poids maximal',
 		'settings.mode.weightPng': 'Non disponible pour PNG (sans perte)',
 		'settings.quality': 'Qualité',
+		'settings.qualityPng': 'PNG est sans perte : la qualité ne s’applique pas.',
+		'settings.jxlWarning':
+			'JPEG XL : l’aperçu peut ne pas s’afficher sur tous les navigateurs (le téléchargement fonctionne partout).',
 		'settings.dimensions': 'Dimensions max.',
 		'settings.dimensions.none': 'Original',
 		'settings.fit': 'Ajustement',
@@ -31,6 +34,9 @@ export const translations: Record<Lang, Record<string, string>> = {
 		'result.saved': '−{pct} %',
 		'result.download': 'Télécharger',
 		'result.compare': 'Comparer',
+		'result.previewUnsupported': 'Aperçu non supporté par ce navigateur',
+		'result.noGain': 'Pas plus petit que l’original',
+		'result.keepOriginal': 'Conserver l’original',
 		'result.downloadAll': 'Télécharger tout (ZIP)',
 		'error.unsupported': '{name} : format non supporté',
 		'error.tooLarge': '{name} : fichier trop lourd (max 100 Mo)'
@@ -46,6 +52,9 @@ export const translations: Record<Lang, Record<string, string>> = {
 		'settings.mode.weight': 'Max file size',
 		'settings.mode.weightPng': 'Not available for PNG (lossless)',
 		'settings.quality': 'Quality',
+		'settings.qualityPng': 'PNG is lossless: quality does not apply.',
+		'settings.jxlWarning':
+			'JPEG XL: preview may not render in all browsers (download works everywhere).',
 		'settings.dimensions': 'Max dimensions',
 		'settings.dimensions.none': 'Original',
 		'settings.fit': 'Fit',
@@ -65,6 +74,9 @@ export const translations: Record<Lang, Record<string, string>> = {
 		'result.saved': '−{pct} %',
 		'result.download': 'Download',
 		'result.compare': 'Compare',
+		'result.previewUnsupported': 'Preview not supported by this browser',
+		'result.noGain': 'Not smaller than the original',
+		'result.keepOriginal': 'Keep the original',
 		'result.downloadAll': 'Download all (ZIP)',
 		'error.unsupported': '{name}: unsupported format',
 		'error.tooLarge': '{name}: file too large (max 100 MB)'

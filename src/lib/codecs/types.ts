@@ -18,7 +18,9 @@ export interface EncodeOptions {
 	quality: number; // 0-100
 	lossless?: boolean;
 	progressive?: boolean;
-	effort?: number; // speed/quality trade-off (avif, jxl, png level)
+	// Normalisé à travers les codecs : PLUS HAUT = plus lent, meilleure compression.
+	// (avif: speed = 10 - effort ; jxl: effort 1-9 ; png: level 1-6)
+	effort?: number;
 }
 
 export interface Codec {

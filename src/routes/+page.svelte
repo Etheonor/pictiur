@@ -42,11 +42,15 @@
 				: t(settings.lang, 'error.tooLarge', { name: r.name })
 		);
 		if (newErrors.length) errors = [...errors, ...newErrors];
+		if (!controller) return;
 
-		for (const file of files) {
-			inputUrls.set(file.name, URL.createObjectURL(new Blob([file.buffer], { type: file.mime })));
+		const ids = controller.add(files.map((f) => toJobInput(f)));
+		for (let i = 0; i < files.length; i++) {
+			inputUrls.set(
+				ids[i],
+				URL.createObjectURL(new Blob([files[i].buffer], { type: files[i].mime }))
+			);
 		}
-		controller?.add(files.map((f) => toJobInput(f)));
 	}
 
 	function toJobInput(file: InputFile) {
@@ -75,7 +79,7 @@
 	function clearFinished(): void {
 		if (!controller) return;
 		for (const job of controller.jobs) {
-			const url = inputUrls.get(job.name);
+			const url = inputUrls.get(job.id);
 			if (url) URL.revokeObjectURL(url);
 		}
 		inputUrls.clear();
@@ -131,7 +135,7 @@
 				<div class="grid">
 					{#each jobs as job (job.id)}
 						{#if job.status === 'done' && job.result}
-							<ResultCard {job} inputUrl={inputUrls.get(job.name) ?? ''} />
+							<ResultCard {job} inputUrl={inputUrls.get(job.id) ?? ''} />
 						{:else}
 							<QueueItem {job} />
 						{/if}

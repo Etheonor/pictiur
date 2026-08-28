@@ -13,6 +13,7 @@ RUN pnpm build
 FROM nginx:alpine
 RUN apk add --no-cache apache2-utils
 COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
+COPY docker/security.conf /etc/nginx/security.conf
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint
 RUN chmod +x /usr/local/bin/entrypoint
 COPY --from=build /app/build /usr/share/nginx/html

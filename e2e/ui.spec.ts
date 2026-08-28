@@ -22,10 +22,18 @@ test('drop files → results → zip download', async ({ page }) => {
 	]);
 
 	await expect(page.locator('article')).toHaveCount(2, { timeout: 30_000 });
-	await expect(page.getByText('−', { exact: false }).first()).toBeVisible();
+	// La sortie est plus petite (−X %) OU pas meilleure que l'original (note « original ») :
+	// l'un des deux indicateurs est toujours affiché dans le footer du résultat.
+	const footer = page.locator('article footer').first();
+	await expect(footer).toBeVisible();
+	await expect(footer).toContainText(/−\s?\d+ %|original/i);
 
-	// 2) chaque résultat a un lien de téléchargement
-	await expect(page.locator('article a[download]')).toHaveCount(2);
+	// 2) chaque résultat a au moins un lien de téléchargement (l'original est proposé
+	// en plus si la sortie n'est pas plus petite)
+	const cards = page.locator('article');
+	await expect(cards).toHaveCount(2);
+	await expect(cards.first().locator('a[download]').first()).toBeVisible();
+	await expect(cards.nth(1).locator('a[download]').first()).toBeVisible();
 
 	// 3) ZIP
 	const downloadPromise = page.waitForEvent('download');

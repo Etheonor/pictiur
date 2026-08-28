@@ -1,2 +1,6 @@
-allowBuilds:
-  esbuild: true
+packages:
+  - '.'
+
+# pnpm 9 : autorise le script de build d'esbuild (pnpm 9 syntaxe onlyBuiltDependencies)
+onlyBuiltDependencies:
+  - esbuild

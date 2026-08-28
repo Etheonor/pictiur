@@ -26,5 +26,7 @@ export async function buildZip(entries: ZipEntry[]): Promise<Blob> {
 		const name = uniqueName(stripUnsafe(entry.name), seen);
 		files[name] = new Uint8Array(await entry.blob.arrayBuffer());
 	}
-	return new Blob([zipSync(files, { level: 6 })], { type: 'application/zip' });
+	// level 0 (store) : les entrées sont déjà compressées (JPEG/PNG/WebP/AVIF/JXL),
+	// re-compresser au niveau 6 coûte du CPU pour ~0 % de gain sur le main thread.
+	return new Blob([zipSync(files, { level: 0 })], { type: 'application/zip' });
 }

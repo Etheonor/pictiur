@@ -1,5 +1,4 @@
 import { defineConfig } from 'vitest/config';
-import { playwright } from '@vitest/browser-playwright';
 import adapter from '@sveltejs/adapter-static';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { SvelteKitPWA } from '@vite-pwa/sveltekit';
@@ -33,6 +32,10 @@ export default defineConfig({
 			},
 			workbox: {
 				globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2,wasm}'], // ← wasm ajouté
+				// Les variantes multithread (_mt) exigent SharedArrayBuffer → headers COOP/COEP,
+				// mais @jsquash ne les sélectionne pas automatiquement : code mort pour cette app.
+				// On les retire du precache (téléchargées à la demande si jamais utilisées).
+				globIgnores: ['**/*_mt*'],
 				maximumFileSizeToCacheInBytes: 8 * 1024 * 1024, // ← 8 Mo (défaut Workbox = 2 Mo)
 				navigateFallback: 'index.html', // ← SPA offline
 				cleanupOutdatedCaches: true,
@@ -48,24 +51,9 @@ export default defineConfig({
 			{
 				extends: './vite.config.ts',
 				test: {
-					name: 'client',
-					browser: {
-						enabled: true,
-						provider: playwright(),
-						instances: [{ browser: 'chromium', headless: true }]
-					},
-					include: ['src/**/*.svelte.{test,spec}.{js,ts}'],
-					exclude: ['src/lib/server/**']
-				}
-			},
-
-			{
-				extends: './vite.config.ts',
-				test: {
 					name: 'server',
 					environment: 'node',
-					include: ['src/**/*.{test,spec}.{js,ts}'],
-					exclude: ['src/**/*.svelte.{test,spec}.{js,ts}']
+					include: ['src/**/*.{test,spec}.{js,ts}']
 				}
 			}
 		]

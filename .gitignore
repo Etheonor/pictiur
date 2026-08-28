@@ -31,8 +31,9 @@ IMPLEMENTATION-PHASE3.md
 IMPLEMENTATION-PHASE4.md
 IMPLEMENTATION-PHASE5.md
 PLAN.md
+AUDIT.md
 
-# Sample images dropped at the root for manual testing (often personal data)
+# Sample images dropped at the root for manual testing
 /*.png
 /*.jpg
 /*.jpeg

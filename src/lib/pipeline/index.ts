@@ -1,5 +1,6 @@
 import { getCodec } from '../codecs';
 import type { Codec, RGBA } from '../codecs/types';
+import { codecIdFromMime } from '../codecs';
 import { encodeRgba } from './encode';
 import { LIMITS, resolveOptions, validateOptions } from './job';
 import type { PipelineInput, PipelineResult } from './job';
@@ -19,17 +20,29 @@ export interface PipelineEnv {
 }
 
 /** Décode natif navigateur/worker : applique l'orientation EXIF (from-image). */
-export async function decodeInBrowser(blob: Blob): Promise<RGBA> {
-	const bitmap = await createImageBitmap(blob);
+export async function decodeInBrowser(
+	blob: Blob,
+	resolveCodec: (id: string) => Promise<Codec | undefined> = getCodec
+): Promise<RGBA> {
 	try {
-		const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
-		const ctx = canvas.getContext('2d');
-		if (!ctx) throw new Error('Canvas 2D context unavailable');
-		ctx.drawImage(bitmap, 0, 0);
-		const img = ctx.getImageData(0, 0, bitmap.width, bitmap.height);
-		return { width: bitmap.width, height: bitmap.height, data: img.data };
-	} finally {
-		bitmap.close();
+		const bitmap = await createImageBitmap(blob);
+		try {
+			const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
+			const ctx = canvas.getContext('2d');
+			if (!ctx) throw new Error('Canvas 2D context unavailable');
+			ctx.drawImage(bitmap, 0, 0);
+			const img = ctx.getImageData(0, 0, bitmap.width, bitmap.height);
+			return { width: bitmap.width, height: bitmap.height, data: img.data };
+		} finally {
+			bitmap.close();
+		}
+	} catch {
+		// Fallback WASM (PLAN §3.4) : createImageBitmap échoue pour certains formats
+		// (ex. AVIF sur vieux navigateurs, JXL hors Safari). On tente le décodeur natif.
+		const id = codecIdFromMime(blob.type);
+		const codec = id ? await resolveCodec(id) : undefined;
+		if (codec?.decode) return codec.decode(await blob.arrayBuffer());
+		throw new Error('DECODE_FAILED');
 	}
 }
 

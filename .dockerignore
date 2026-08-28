@@ -12,3 +12,5 @@ docker-compose.yml
 IMPLEMENTATION.md
 IMPLEMENTATION-PHASE*.md
 PLAN.md
+# Échantillons manuels à la racine (données personnelles, inutiles dans l'image)
+/*.png

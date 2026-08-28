@@ -17,6 +17,7 @@ export const pngCodec: Codec = {
 	async encode(rgba: RGBA, opts: EncodeOptions): Promise<Blob> {
 		// oxipng: level 1-6 (4+ uses zopfli → very slow, ~0% gain on photos).
 		// Bench: level 1 = 3× faster than 2 for the same size → default 1.
+		// `effort` normalisé : plus haut = plus lent, meilleure compression (oxipng level 1-6).
 		const level = clampLevel(opts.effort ?? 1);
 		const buffer = await optimise(createImageData(rgba), { level });
 		return arrayBufferToBlob(buffer, 'image/png');

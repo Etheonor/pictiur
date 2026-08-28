@@ -5,6 +5,7 @@
 	let { formats }: { formats: { id: string; label: string }[] } = $props();
 
 	const isPng = $derived(settings.targetFormat === 'png');
+	const isJxl = $derived(settings.targetFormat === 'jxl');
 
 	function onFormatChange(value: string): void {
 		updateSettings({
@@ -26,6 +27,9 @@
 			{/each}
 		</select>
 	</label>
+	{#if isJxl}
+		<small style="color: var(--pico-muted-color);">{t(settings.lang, 'settings.jxlWarning')}</small>
+	{/if}
 
 	<fieldset>
 		<legend>{t(settings.lang, 'settings.compress')}</legend>
@@ -55,7 +59,9 @@
 		{/if}
 	</fieldset>
 
-	{#if isPng || settings.compressMode === 'quality'}
+	{#if isPng}
+		<small style="color: var(--pico-muted-color);">{t(settings.lang, 'settings.qualityPng')}</small>
+	{:else if settings.compressMode === 'quality'}
 		<label>
 			{t(settings.lang, 'settings.quality')} — {settings.quality}
 			<input

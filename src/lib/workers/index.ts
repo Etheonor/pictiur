@@ -13,6 +13,12 @@ function createBrowserWorker(): PoolWorker {
 		get onmessage() {
 			return null;
 		},
+		set onerror(handler: ((event: unknown) => void) | null) {
+			worker.onerror = handler ?? null;
+		},
+		get onerror() {
+			return null;
+		},
 		terminate(): void {
 			worker.terminate();
 		}

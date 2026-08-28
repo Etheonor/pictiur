@@ -11,6 +11,7 @@ let maxInFlight = 0;
 
 class FakeWorker implements PoolWorker {
 	onmessage: ((event: { data: unknown }) => void) | null = null;
+	onerror: ((event: unknown) => void) | null = null;
 	messages: WorkerJob[] = [];
 	active = 0;
 	terminated = false;
@@ -111,6 +112,44 @@ describe('WorkerPool', () => {
 	it('rejects when a worker reports an error', async () => {
 		const pool = new WorkerPool(1, () => new FakeWorker(1, true));
 		await expect(pool.submit({ payload: job('e1') })).rejects.toThrow('BOOM');
+		pool.terminate();
+	});
+
+	it('respawns a crashed worker and rejects its in-flight job', async () => {
+		// Worker qui ne répond jamais mais peut "planter" (WASM OOM) → onerror.
+		class CrashWorker implements PoolWorker {
+			onmessage: ((event: { data: unknown }) => void) | null = null;
+			onerror: ((event: unknown) => void) | null = null;
+			terminated = false;
+			postMessage(): void {}
+			crash(): void {
+				this.onerror?.({ message: 'oom' });
+			}
+			terminate(): void {
+				this.terminated = true;
+			}
+		}
+
+		const crasher = new CrashWorker();
+		const replacement = new FakeWorker(1);
+		let first = true;
+		const pool = new WorkerPool(1, () => {
+			if (first) {
+				first = false;
+				return crasher;
+			}
+			return replacement;
+		});
+
+		const p1 = pool.submit({ payload: job('crash') });
+		crasher.crash();
+		await expect(p1).rejects.toThrow('WORKER_CRASH');
+		expect(crasher.terminated).toBe(true);
+
+		// Le slot a été recréé : le pool continue de fonctionner.
+		const r2 = await pool.submit({ payload: job('after') });
+		expect(r2.kind).toBe('result');
+		expect(replacement.terminated).toBe(false);
 		pool.terminate();
 	});
 });

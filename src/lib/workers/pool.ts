@@ -4,6 +4,7 @@ import type { WorkerJob, WorkerResponse } from './codec.worker';
 export interface PoolWorker {
 	postMessage(message: unknown, transfer?: Transferable[]): void;
 	onmessage: ((event: { data: unknown }) => void) | null;
+	onerror?: ((event: unknown) => void) | null;
 	terminate(): void;
 }
 
@@ -31,14 +32,38 @@ export class WorkerPool {
 	private readonly queue: JobRecord[] = [];
 	private readonly inflight = new Map<string, JobRecord>();
 	private readonly assignments = new Map<string, number>();
+	private readonly createWorker: () => PoolWorker;
 	private done = false;
 
 	constructor(size: number, createWorker: () => PoolWorker) {
+		this.createWorker = createWorker;
 		this.workers = Array.from({ length: Math.max(1, size) }, () => createWorker());
 		this.busy = this.workers.map(() => false);
 		this.workers.forEach((worker, index) => {
 			worker.onmessage = (event) => this.onMessage(index, event.data as WorkerResponse);
+			worker.onerror = (event) => this.onWorkerError(index, event);
 		});
+	}
+
+	/** Un worker a planté (WASM OOM, etc.) : rejette ses jobs en vol et le remplace. */
+	private onWorkerError(index: number, event: unknown): void {
+		console.error('Pictiúr: worker crashed, restarting slot', index, event);
+		for (const [id, record] of [...this.inflight]) {
+			if (this.assignments.get(id) === index) {
+				this.inflight.delete(id);
+				this.assignments.delete(id);
+				record.reject(new Error('WORKER_CRASH'));
+			}
+		}
+		if (!this.done) {
+			this.workers[index].terminate();
+			const fresh = this.createWorker();
+			fresh.onmessage = (e) => this.onMessage(index, e.data as WorkerResponse);
+			fresh.onerror = (e) => this.onWorkerError(index, e);
+			this.workers[index] = fresh;
+			this.busy[index] = false;
+			this.dispatch();
+		}
 	}
 
 	get size(): number {

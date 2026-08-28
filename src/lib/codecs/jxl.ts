@@ -12,9 +12,10 @@ export const jxlCodec: Codec = {
 	defaultQuality: 75,
 
 	async encode(rgba: RGBA, opts: EncodeOptions): Promise<Blob> {
+		// `effort` normalisé : plus haut = plus lent, meilleure compression (libjxl 1-9).
 		const buffer = await encodeJxl(createImageData(rgba), {
 			quality: opts.quality,
-			effort: opts.effort ?? 7, // 1-9: lower = faster, higher = better
+			effort: opts.effort ?? 7,
 			lossless: opts.lossless
 		});
 		return arrayBufferToBlob(buffer, 'image/jxl');

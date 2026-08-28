@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 34" fill="none">
+  <defs><mask id="notch"><rect width="34" height="34" fill="white"></rect><rect x="22" y="0" width="12" height="12" fill="black"></rect></mask></defs>
+  <g mask="url(#notch)"><rect x="3" y="3" width="28" height="28" rx="7.5" stroke="#2dd4a7" stroke-width="2.2" fill="none"></rect></g>
+  <circle cx="17" cy="17" r="7" stroke="#2dd4a7" stroke-width="2.2" fill="none"></circle>
+  <circle cx="17" cy="17" r="2.2" fill="#2dd4a7"></circle>
+  <path d="M24.5 7.5 L31 7.5" stroke="#2dd4a7" stroke-width="2.2" stroke-linecap="round"></path>
+  <text x="42" y="24.5" font-family="'Space Grotesk',system-ui,sans-serif" font-size="21" font-weight="700" letter-spacing="-0.4" fill="#e8e8e8">Pictiúr</text>
+</svg>

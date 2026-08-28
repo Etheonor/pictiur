@@ -23,15 +23,13 @@ test('drop files → results → zip download', async ({ page }) => {
 
 	await expect(page.locator('article')).toHaveCount(2, { timeout: 30_000 });
 	// La sortie est plus petite (−X %) OU pas meilleure que l'original (note « original ») :
-	// l'un des deux indicateurs est toujours affiché dans le footer du résultat.
-	const footer = page.locator('article footer').first();
-	await expect(footer).toBeVisible();
-	await expect(footer).toContainText(/−\s?\d+ %|original/i);
+	// l'un des deux indicateurs est toujours affiché dans le résultat.
+	const cards = page.locator('article');
+	await expect(cards).toHaveCount(2);
+	await expect(cards.first()).toContainText(/−\s?\d+ %|original/i, { timeout: 30_000 });
 
 	// 2) chaque résultat a au moins un lien de téléchargement (l'original est proposé
 	// en plus si la sortie n'est pas plus petite)
-	const cards = page.locator('article');
-	await expect(cards).toHaveCount(2);
 	await expect(cards.first().locator('a[download]').first()).toBeVisible();
 	await expect(cards.nth(1).locator('a[download]').first()).toBeVisible();
 
@@ -49,16 +47,16 @@ test('drop files → results → zip download', async ({ page }) => {
 	expect(failures).toEqual([]);
 });
 
-test('settings are applied (max width)', async ({ page }) => {
+test('settings persist (format + language)', async ({ page }) => {
 	await page.goto('/');
 
-	// passer le mode en "poids maximal" nécessite le pipeline ; on vérifie plutôt
-	// la persistance : relire la page garde le choix de langue et de format
-	await page.locator('select').first().selectOption('avif');
+	// Le format est choisi via des pills radio ; on vérifie la persistance :
+	// relire la page garde le choix de format et de langue.
+	await page.getByRole('radio', { name: 'AVIF' }).click();
 	await page.getByRole('button', { name: 'EN' }).click();
 
 	await page.reload();
-	await expect(page.locator('select').first()).toHaveValue('avif');
+	await expect(page.getByRole('radio', { name: 'AVIF' })).toBeChecked();
 	// langue persistée : on est en EN, la bascule affiche donc 'FR'
 	await expect(page.getByRole('button', { name: 'FR' })).toBeVisible();
 });

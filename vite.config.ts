@@ -17,17 +17,18 @@ export default defineConfig({
 		}),
 		SvelteKitPWA({
 			registerType: 'autoUpdate',
-			includeAssets: ['favicon.ico'],
+			includeAssets: ['favicon.svg', 'pictiur-app-icon.svg'],
 			manifest: {
 				name: 'Pictiúr',
 				short_name: 'Pictiúr',
 				description: 'Optimize images 100% locally — convert, resize, optimize in one pass.',
-				theme_color: '#191919',
-				background_color: '#191919',
+				theme_color: '#141414',
+				background_color: '#141414',
 				display: 'standalone',
 				icons: [
-					{ src: 'icon-192.png', sizes: '192x192', type: 'image/png' },
-					{ src: 'icon-512.png', sizes: '512x512', type: 'image/png' }
+					{ src: 'pictiur-app-icon-192.png', sizes: '192x192', type: 'image/png' },
+					{ src: 'pictiur-app-icon-512.png', sizes: '512x512', type: 'image/png' },
+					{ src: 'pictiur-app-icon.svg', sizes: 'any', type: 'image/svg+xml' }
 				]
 			},
 			workbox: {

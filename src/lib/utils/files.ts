@@ -61,6 +61,14 @@ export function outputFileName(name: string, mime: string): string {
 	return `${base}.${EXT_BY_MIME[mime] ?? 'bin'}`;
 }
 
+export function formatBytes(bytes: number, lang: 'fr' | 'en'): string {
+	const sep = lang === 'fr' ? ',' : '.';
+	const n = (v: number): string => v.toFixed(1).replace('.', sep);
+	if (bytes < 1024) return `${bytes} B`;
+	if (bytes < 1024 * 1024) return `${n(bytes / 1024)} Ko`;
+	return `${n(bytes / (1024 * 1024))} Mo`;
+}
+
 export function toPipelineOptions(settings: {
 	targetFormat: string;
 	compressMode: 'quality' | 'weight';

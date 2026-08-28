@@ -24,15 +24,6 @@ vite.config.ts.timestamp-*
 # Playwright
 test-results
 
-# Planning artifacts (not part of the repo)
-IMPLEMENTATION.md
-IMPLEMENTATION-PHASE2.md
-IMPLEMENTATION-PHASE3.md
-IMPLEMENTATION-PHASE4.md
-IMPLEMENTATION-PHASE5.md
-PLAN.md
-AUDIT.md
-
 # Sample images dropped at the root for manual testing
 /*.png
 /*.jpg

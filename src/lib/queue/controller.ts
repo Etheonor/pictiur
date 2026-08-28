@@ -17,6 +17,7 @@ export interface QueueJobResult {
 export interface QueueJob {
 	id: string;
 	name: string;
+	format: string; // codec cible (label affiché pendant le traitement)
 	inputSize: number;
 	status: JobStatus;
 	progress: number; // 0-100
@@ -72,6 +73,7 @@ export class JobQueueController {
 			const job: QueueJob = {
 				id,
 				name: input.name,
+				format: input.options.targetFormat,
 				inputSize: input.buffer.byteLength,
 				status: 'queued',
 				progress: 0
@@ -129,6 +131,16 @@ export class JobQueueController {
 	abortAll(): void {
 		for (const controller of this.abortControllers.values()) controller.abort();
 		// la promesse rejetée marque chaque job 'aborted' via son catch
+	}
+
+	removeJob(id: string): void {
+		const index = this.jobs.findIndex((j) => j.id === id);
+		if (index < 0) return;
+		const [job] = this.jobs.splice(index, 1);
+		if (job.result?.url) this.revokeUrl(job.result.url);
+		this.abortControllers.get(id)?.abort();
+		this.abortControllers.delete(id);
+		this.notify();
 	}
 
 	clearFinished(): void {

@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { browser, dev } from '$app/environment';
-	import favicon from '$lib/assets/favicon.svg';
-	import '@picocss/pico/css/pico.min.css';
+	import '../app.css';
 
 	let { children } = $props();
 
@@ -15,11 +14,11 @@
 <svelte:head>
 	<title>Pictiúr</title>
 	<meta name="description" content="Optimize images 100% locally" />
-	<meta name="theme-color" content="#191919" />
+	<meta name="theme-color" content="#141414" />
 	{#if !dev}
 		<link rel="manifest" href="/manifest.webmanifest" />
 	{/if}
-	<link rel="icon" href={favicon} />
+	<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 </svelte:head>
 
 {@render children()}

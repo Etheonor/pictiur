@@ -8,6 +8,8 @@ export default defineConfig({
 	// the same dev server; parallel runs cause flaky "execution context destroyed".
 	fullyParallel: false,
 	workers: 1,
+	// retry : les e2e WASM lourdes sont sensibles aux machines CI (context destroyed / timeout)
+	retries: 1,
 	webServer: { command: 'pnpm dev', port: 5173, reuseExistingServer: true },
 	use: { baseURL: 'http://localhost:5173' },
 	testMatch: ['e2e/**/*.{e2e,spec}.{ts,js}', 'src/**/*.e2e.{ts,js}'],

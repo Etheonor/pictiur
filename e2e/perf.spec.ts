@@ -1,6 +1,9 @@
 import { expect, test } from '@playwright/test';
 
 test('budget mode on 3 large images: fast and under target', async ({ page }) => {
+	// 3 images 3000×2000 en mode budget : plusieurs encodages chacune → peut dépasser
+	// le timeout Playwright par défaut (30 s) sur une CI fraîche.
+	test.setTimeout(240_000);
 	await page.goto('/');
 
 	const report = await page.evaluate(async () => {

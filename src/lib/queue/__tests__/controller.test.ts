@@ -53,12 +53,18 @@ const input = (name: string, format = 'webp'): QueueJobInput => ({
 });
 
 describe('JobQueueController', () => {
-	it('goes queued → processing → done with result and progress', async () => {
+	it('stages files as ready, then start() runs them to done', async () => {
 		const pool = new FakePool(5);
 		const onChange = vi.fn();
 		const controller = new JobQueueController({ pool: pool as never, onChange });
 		const [id] = controller.add([input('a.png')]);
 		const job = () => controller.jobs.find((j) => j.id === id)!;
+
+		// Le drop ne lance RIEN : le fichier est en attente
+		expect(job().status).toBe('ready');
+		expect(pool.submitted).toHaveLength(0);
+
+		controller.start();
 		expect(job().status).toBe('processing');
 		await vi.waitFor(() => expect(job().status).toBe('done'));
 		expect(job().result?.width).toBe(10);
@@ -68,18 +74,20 @@ describe('JobQueueController', () => {
 		expect(controller.jobs).toHaveLength(1);
 	});
 
-	it('passes pipeline options through to the pool', async () => {
+	it('applies launch-time options over the drop-time ones', async () => {
 		const pool = new FakePool(0);
 		const controller = new JobQueueController({ pool: pool as never });
-		controller.add([input('a.png', 'avif')]);
+		controller.add([input('a.png', 'webp')]); // réglage au drop
+		controller.start({ targetFormat: 'jpeg', quality: 80 }); // réglage au lancement
 		await vi.waitFor(() => expect(pool.submitted).toHaveLength(1));
-		expect(pool.submitted[0].options).toMatchObject({ targetFormat: 'avif' });
+		expect(pool.submitted[0].options).toMatchObject({ targetFormat: 'jpeg', quality: 80 });
 	});
 
 	it('marks a job as error when the pool rejects', async () => {
 		const pool = new FakePool(1, true);
 		const controller = new JobQueueController({ pool: pool as never });
 		const [id] = controller.add([input('a.png')]);
+		controller.start();
 		await vi.waitFor(() => expect(controller.jobs.find((j) => j.id === id)!.status).toBe('error'));
 		expect(controller.jobs.find((j) => j.id === id)!.error).toBe('BOOM');
 	});
@@ -88,20 +96,46 @@ describe('JobQueueController', () => {
 		const pool = new FakePool(50);
 		const controller = new JobQueueController({ pool: pool as never });
 		controller.add([input('a.png'), input('b.png')]);
-		controller.abortAll();
+		controller.abortAll(); // fichiers jamais lancés → aborted directement
 		await vi.waitFor(() => expect(controller.jobs.every((j) => j.status === 'aborted')).toBe(true));
+
+		// aborted en cours de traitement
+		controller.add([input('c.png')]);
+		controller.start();
+		await vi.waitFor(() => expect(controller.jobs[2].status).toBe('processing'));
+		controller.abortAll();
+		await vi.waitFor(() => expect(controller.jobs[2].status).toBe('aborted'));
 	});
 
-	it('clearFinished removes done jobs and revokes object urls', async () => {
+	it('clearFinished removes done jobs and revokes object urls, keeps ready', async () => {
 		const pool = new FakePool(0);
 		const revoke = vi.fn();
 		const controller = new JobQueueController({
 			pool: pool as never,
 			revokeObjectUrl: revoke
 		});
-		controller.add([input('a.png')]);
+		controller.add([input('done.png')]);
+		controller.start({ targetFormat: 'webp' });
+		// fichier ajouté APRÈS le lancement → reste en attente
+		controller.add([input('pending.png')]);
 		await vi.waitFor(() => expect(controller.jobs[0].status).toBe('done'));
+		expect(controller.jobs[1].status).toBe('ready');
 		controller.clearFinished();
+		expect(controller.jobs).toHaveLength(1);
+		expect(controller.jobs[0].name).toBe('pending.png');
+		expect(revoke).toHaveBeenCalledTimes(1);
+	});
+
+	it('removeJob removes a staged file and a done job', async () => {
+		const pool = new FakePool(0);
+		const revoke = vi.fn();
+		const controller = new JobQueueController({ pool: pool as never, revokeObjectUrl: revoke });
+		controller.add([input('staged.png'), input('done.png')]);
+		controller.removeJob(controller.jobs[0].id); // fichier jamais lancé
+		expect(controller.jobs).toHaveLength(1);
+		controller.start();
+		await vi.waitFor(() => expect(controller.jobs[0].status).toBe('done'));
+		controller.removeJob(controller.jobs[0].id);
 		expect(controller.jobs).toHaveLength(0);
 		expect(revoke).toHaveBeenCalledTimes(1);
 	});

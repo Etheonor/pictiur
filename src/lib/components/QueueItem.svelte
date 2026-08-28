@@ -1,10 +1,14 @@
 <script lang="ts">
-	import { Clock } from '@lucide/svelte';
+	import { Clock, X } from '@lucide/svelte';
 	import { t } from '$lib/i18n';
 	import { settings } from '$lib/stores/settings.svelte';
 	import type { QueueJob } from '$lib/queue/controller';
 
-	let { job, position }: { job: QueueJob; position: number } = $props();
+	let {
+		job,
+		position,
+		onRemove
+	}: { job: QueueJob; position: number; onRemove?: (id: string) => void } = $props();
 
 	const statusLabel = $derived(t(settings.lang, `job.${job.status}`));
 	const formatLabel = $derived(job.format.toUpperCase());
@@ -13,10 +17,22 @@
 <article class="queue-item queue-item--{job.status}" aria-busy={job.status === 'processing'}>
 	<div class="row">
 		<strong class="name" title={job.name}>{job.name}</strong>
-		<span class="pill">{statusLabel}</span>
+		<div class="row__right">
+			<span class="pill">{statusLabel}</span>
+			{#if job.status === 'ready' && onRemove}
+				<button
+					type="button"
+					class="remove"
+					aria-label={t(settings.lang, 'queue.remove')}
+					onclick={() => onRemove(job.id)}
+				>
+					<X size={13} strokeWidth={1.75} aria-hidden="true" />
+				</button>
+			{/if}
+		</div>
 	</div>
 
-	{#if job.status === 'queued'}
+	{#if job.status === 'ready' || job.status === 'queued'}
 		<small class="meta">
 			<Clock size={13} strokeWidth={1.75} aria-hidden="true" />
 			<span>{t(settings.lang, 'queue.position', { n: String(position) })}</span>
@@ -54,6 +70,10 @@
 		background: var(--surface-dim);
 		border: 1px dashed var(--border-input);
 	}
+	.queue-item--ready {
+		background: var(--surface-dim);
+		border: 1px dashed var(--border-input);
+	}
 	.queue-item--processing {
 		background: var(--surface);
 		border: 1px solid var(--border);
@@ -63,6 +83,12 @@
 		align-items: baseline;
 		justify-content: space-between;
 		gap: 12px;
+	}
+	.row__right {
+		flex: none;
+		display: flex;
+		align-items: center;
+		gap: 8px;
 	}
 	.name {
 		overflow: hidden;
@@ -81,7 +107,8 @@
 		border-radius: var(--r-pill);
 		white-space: nowrap;
 	}
-	.queue-item--queued .pill {
+	.queue-item--queued .pill,
+	.queue-item--ready .pill {
 		background: var(--surface-input);
 		border: 1px solid var(--border-input);
 		color: var(--text-3);
@@ -89,6 +116,22 @@
 	.queue-item--processing .pill {
 		background: var(--accent-tint-14);
 		color: var(--accent);
+	}
+	.remove {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 24px;
+		height: 24px;
+		border-radius: 6px;
+		color: var(--text-4);
+		transition:
+			background-color var(--dur) var(--ease),
+			color var(--dur) var(--ease);
+	}
+	.remove:hover {
+		background: var(--surface);
+		color: var(--danger-text);
 	}
 	.meta {
 		display: flex;

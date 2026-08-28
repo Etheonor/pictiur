@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { Archive, Globe, Image, LoaderCircle, TriangleAlert, X } from '@lucide/svelte';
+	import { Archive, Globe, Image, LoaderCircle, Play, TriangleAlert, X } from '@lucide/svelte';
 	import DropZone from '$lib/components/DropZone.svelte';
 	import SettingsPanel from '$lib/components/SettingsPanel.svelte';
 	import QueueItem from '$lib/components/QueueItem.svelte';
@@ -24,6 +24,7 @@
 	let compareJob = $state<QueueJob | null>(null);
 
 	const doneCount = $derived(jobs.filter((j) => j.status === 'done' && j.result).length);
+	const readyCount = $derived(jobs.filter((j) => j.status === 'ready').length);
 	const processedCount = $derived(
 		jobs.filter((j) => ['done', 'error', 'aborted'].includes(j.status)).length
 	);
@@ -69,6 +70,12 @@
 			buffer: file.buffer,
 			options: toPipelineOptions(settings)
 		};
+	}
+
+	function launch(): void {
+		if (!controller) return;
+		// Les réglages sont appliqués AU MOMENT du lancement (et non au drop).
+		controller.start(toPipelineOptions(settings));
 	}
 
 	async function downloadAll(): Promise<void> {
@@ -175,26 +182,41 @@
 			<SettingsPanel {formats} />
 
 			<section class="queue">
-				{#if doneCount > 0}
+				{#if readyCount > 0 || doneCount > 0}
 					<div class="actionbar">
-						<button type="button" class="btn btn--primary" disabled={zipping} onclick={downloadAll}>
-							{#if zipping}
-								<LoaderCircle size={15} strokeWidth={1.75} class="spin" aria-hidden="true" />
-								{t(settings.lang, 'zip.preparing')}
-							{:else}
-								<Archive size={15} strokeWidth={1.75} aria-hidden="true" />
-								{t(settings.lang, 'result.downloadAll')}
-							{/if}
-						</button>
-						<button type="button" class="btn btn--secondary" onclick={clearFinished}>
-							{t(settings.lang, 'queue.clear')}
-						</button>
-						<small class="count nums">
-							{t(settings.lang, 'queue.progressCount', {
-								done: String(processedCount),
-								total: String(jobs.length)
-							})}
-						</small>
+						{#if readyCount > 0}
+							<button type="button" class="btn btn--primary" onclick={launch}>
+								<Play size={14} strokeWidth={1.75} aria-hidden="true" />
+								{t(settings.lang, 'queue.launchCount', { n: String(readyCount) })}
+							</button>
+						{/if}
+						{#if doneCount > 0}
+							<button
+								type="button"
+								class="btn btn--secondary"
+								disabled={zipping}
+								onclick={downloadAll}
+							>
+								{#if zipping}
+									<LoaderCircle size={15} strokeWidth={1.75} class="spin" aria-hidden="true" />
+									{t(settings.lang, 'zip.preparing')}
+								{:else}
+									<Archive size={15} strokeWidth={1.75} aria-hidden="true" />
+									{t(settings.lang, 'result.downloadAll')}
+								{/if}
+							</button>
+							<button type="button" class="btn btn--ghost" onclick={clearFinished}>
+								{t(settings.lang, 'queue.clear')}
+							</button>
+						{/if}
+						{#if processedCount > 0}
+							<small class="count nums">
+								{t(settings.lang, 'queue.progressCount', {
+									done: String(processedCount),
+									total: String(jobs.length)
+								})}
+							</small>
+						{/if}
 					</div>
 				{/if}
 
@@ -215,7 +237,7 @@
 									onRemove={removeJob}
 								/>
 							{:else}
-								<QueueItem {job} position={i + 1} />
+								<QueueItem {job} position={i + 1} onRemove={removeJob} />
 							{/if}
 						{/each}
 					</div>

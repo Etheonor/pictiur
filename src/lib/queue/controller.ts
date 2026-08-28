@@ -2,7 +2,7 @@ import type { WorkerJob } from '../workers/codec.worker';
 import type { PoolResult } from '../workers/pool';
 import type { PipelineOptions } from '../pipeline/job';
 
-export type JobStatus = 'queued' | 'processing' | 'done' | 'error' | 'aborted';
+export type JobStatus = 'ready' | 'queued' | 'processing' | 'done' | 'error' | 'aborted';
 
 export interface QueueJobResult {
 	blob: Blob;
@@ -55,6 +55,7 @@ const genId = (): string => `ui-${++seq}-${Date.now()}`;
 export class JobQueueController {
 	readonly jobs: QueueJob[] = [];
 	private readonly abortControllers = new Map<string, AbortController>();
+	private readonly inputs = new Map<string, QueueJobInput>();
 
 	private readonly createUrl: (blob: Blob) => string;
 	private readonly revokeUrl: (url: string) => void;
@@ -66,6 +67,10 @@ export class JobQueueController {
 		this.notify = deps.onChange ?? (() => {});
 	}
 
+	/**
+	 * Met des fichiers en attente ('ready') SANS les traiter : on peut en ajouter
+	 * un par un et ajuster les réglages. `start()` lance réellement le traitement.
+	 */
 	add(inputs: QueueJobInput[]): string[] {
 		const ids: string[] = [];
 		for (const input of inputs) {
@@ -75,15 +80,33 @@ export class JobQueueController {
 				name: input.name,
 				format: input.options.targetFormat,
 				inputSize: input.buffer.byteLength,
-				status: 'queued',
+				status: 'ready',
 				progress: 0
 			};
 			this.jobs.push(job);
+			this.inputs.set(id, input);
 			ids.push(id);
-			void this.run(input, job);
 		}
 		this.notify();
 		return ids;
+	}
+
+	/**
+	 * Lance le traitement de tous les fichiers en attente.
+	 * @param options réglages appliqués AU MOMENT du lancement (surchargent ceux du drop).
+	 */
+	start(options?: PipelineOptions): void {
+		for (const job of this.jobs) {
+			if (job.status !== 'ready') continue;
+			job.status = 'queued';
+			const input = this.inputs.get(job.id);
+			if (input) void this.run(options ? { ...input, options } : input, job);
+		}
+		this.notify();
+	}
+
+	hasReady(): boolean {
+		return this.jobs.some((j) => j.status === 'ready');
 	}
 
 	private async run(input: QueueJobInput, job: QueueJob): Promise<void> {
@@ -129,14 +152,19 @@ export class JobQueueController {
 	}
 
 	abortAll(): void {
+		for (const job of this.jobs) {
+			if (job.status === 'ready') job.status = 'aborted';
+		}
 		for (const controller of this.abortControllers.values()) controller.abort();
-		// la promesse rejetée marque chaque job 'aborted' via son catch
+		// la promesse rejetée marque chaque job en vol 'aborted' via son catch
+		this.notify();
 	}
 
 	removeJob(id: string): void {
 		const index = this.jobs.findIndex((j) => j.id === id);
 		if (index < 0) return;
 		const [job] = this.jobs.splice(index, 1);
+		this.inputs.delete(id);
 		if (job.result?.url) this.revokeUrl(job.result.url);
 		this.abortControllers.get(id)?.abort();
 		this.abortControllers.delete(id);
@@ -147,9 +175,12 @@ export class JobQueueController {
 		for (const job of this.jobs) {
 			if (job.status === 'done' || job.status === 'error' || job.status === 'aborted') {
 				if (job.result?.url) this.revokeUrl(job.result.url);
+				this.inputs.delete(job.id);
 			}
 		}
-		const remaining = this.jobs.filter((j) => j.status === 'queued' || j.status === 'processing');
+		const remaining = this.jobs.filter(
+			(j) => j.status === 'ready' || j.status === 'queued' || j.status === 'processing'
+		);
 		this.jobs.splice(0, this.jobs.length, ...remaining);
 		this.notify();
 	}

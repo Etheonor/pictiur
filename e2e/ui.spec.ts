@@ -14,19 +14,19 @@ test('drop files → results → zip download', async ({ page }) => {
 
 	await page.goto('/');
 
-	// 1) format webp par défaut — drop 2 fichiers
+	// 1) default format webp — drop 2 files (default language is EN)
 	const input = page.locator('input[type="file"]');
 	await input.setInputFiles([
 		{ name: 'photo.png', mimeType: 'image/png', buffer: TINY_PNG },
 		{ name: 'logo.png', mimeType: 'image/png', buffer: TINY_PNG }
 	]);
 
-	// 1) files are STAGED (no automatic processing on drop)
+	// files are STAGED (no automatic processing on drop)
 	await expect(page.locator('article')).toHaveCount(2, { timeout: 30_000 });
-	await expect(page.getByText('Prêt').first()).toBeVisible();
+	await expect(page.getByText('Ready').first()).toBeVisible();
 
-	// 2) on lance le traitement
-	await page.getByText(/Lancer le traitement \(2\)/).click();
+	// launch the processing
+	await page.getByText(/Start processing \(2\)/).click();
 
 	// 3) the output is smaller (−X %) OR not better than the original (« original » note):
 	// one of the two indicators is always shown in the result.
@@ -41,15 +41,15 @@ test('drop files → results → zip download', async ({ page }) => {
 
 	// 5) ZIP
 	const downloadPromise = page.waitForEvent('download');
-	await page.getByText('Télécharger tout (ZIP)').click();
+	await page.getByText('Download all (ZIP)').click();
 	const download = await downloadPromise;
 	expect(download.suggestedFilename()).toBe('pictiur.zip');
 
-	// 6) bascule de langue
-	await page.getByRole('button', { name: 'EN' }).click();
-	await expect(page.getByText('Download all (ZIP)')).toBeVisible();
+	// 6) language toggle: switch to FR
+	await page.getByRole('button', { name: 'FR' }).click();
+	await expect(page.getByText('Télécharger tout (ZIP)')).toBeVisible();
 
-	// 7) aucun 404 pendant la session
+	// 7) no 404 during the session
 	expect(failures).toEqual([]);
 });
 
@@ -59,10 +59,10 @@ test('settings persist (format + language)', async ({ page }) => {
 	// The format is chosen via radio pills; we check persistence:
 	// reloading the page keeps the format and language choices.
 	await page.getByRole('radio', { name: 'AVIF' }).click();
-	await page.getByRole('button', { name: 'EN' }).click();
+	await page.getByRole('button', { name: 'FR' }).click(); // switch to FR
 
 	await page.reload();
 	await expect(page.getByRole('radio', { name: 'AVIF' })).toBeChecked();
-	// language persisted: we are in EN, so the toggle shows 'FR'
-	await expect(page.getByRole('button', { name: 'FR' })).toBeVisible();
+	// language persisted: we are in FR, so the toggle shows 'EN'
+	await expect(page.getByRole('button', { name: 'EN' })).toBeVisible();
 });

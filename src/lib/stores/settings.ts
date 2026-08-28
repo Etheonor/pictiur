@@ -16,7 +16,6 @@ export const STORAGE_KEY = 'pictiur:settings:v1';
 
 export const ALLOWED_FORMATS = ['jpeg', 'webp', 'png', 'avif', 'jxl'];
 const FITS: FitMode[] = ['contain', 'cover', 'fill'];
-const LANGS = ['fr', 'en'];
 
 export const DEFAULT_SETTINGS: Settings = {
 	targetFormat: 'webp',
@@ -26,7 +25,7 @@ export const DEFAULT_SETTINGS: Settings = {
 	maxHeight: 0,
 	fit: 'contain',
 	maxWeightKB: 200,
-	lang: 'fr'
+	lang: 'en'
 };
 
 const clamp = (n: number, min: number, max: number): number => Math.min(max, Math.max(min, n));
@@ -49,7 +48,7 @@ export function sanitizeSettings(value: Partial<Settings> | unknown): Settings {
 		maxHeight: intOr(v.maxHeight, DEFAULT_SETTINGS.maxHeight),
 		fit: (FITS as readonly string[]).includes(v.fit ?? '') ? v.fit! : DEFAULT_SETTINGS.fit,
 		maxWeightKB: clamp(intOr(v.maxWeightKB, DEFAULT_SETTINGS.maxWeightKB), 1, 100_000),
-		lang: LANGS.includes(v.lang ?? '') && v.lang === 'en' ? 'en' : 'fr'
+		lang: v.lang === 'fr' ? 'fr' : 'en'
 	};
 }
 

@@ -17,7 +17,7 @@ pnpm dev
 
 Pictiúr is a fully static app (adapter-static) — any static host works.
 
-### Docker (self-hosted / Coolify)
+### Docker (self-hosted)
 
 Simplest way — official Docker image:
 
@@ -34,27 +34,6 @@ docker run -d --name pictiur -p 3002:80 \
 ```
 
 Or with docker-compose — see `docker-compose.yml` (builds locally from the Dockerfile by default).
-
-**Coolify deploy steps:**
-
-1. **+ New → Docker Image**
-2. **Image**: `ghcr.io/etheonor/pictiur:latest`
-3. **Domain**: e.g. `https://px.example.com` _(Traefik route + automatic Let's Encrypt certificate)_
-4. **Ports Exposes**: `80` _(required — without it the proxy doesn't know where to route)_
-5. **Environment variables** (optional — to protect the instance):
-
-   ```
-   USERNAME=admin
-   PASSWORD=<your-password>
-   ```
-
-   _(leave empty for a public demo without login)_
-
-6. **Deploy**
-
-⚠️ **Coolify pitfalls**: do **not** leave _Ports Exposes_ empty → 503 on first attempt. If the
-ghcr.io image is private: server settings → registries (token `read:packages`) or make the
-package public (Packages → Make public).
 
 ## Third-party
 

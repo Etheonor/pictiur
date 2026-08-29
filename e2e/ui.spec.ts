@@ -53,6 +53,23 @@ test('drop files → results → zip download', async ({ page }) => {
 	expect(failures).toEqual([]);
 });
 
+test('download all individually (no ZIP)', async ({ page }) => {
+	await page.goto('/');
+	await page.locator('input[type="file"]').setInputFiles([
+		{ name: 'photo.png', mimeType: 'image/png', buffer: TINY_PNG },
+		{ name: 'logo.png', mimeType: 'image/png', buffer: TINY_PNG }
+	]);
+	await page.getByText(/Start processing \(2\)/).click();
+	await expect(page.locator('article.result-card')).toHaveCount(2, { timeout: 30_000 });
+
+	const downloads: string[] = [];
+	page.on('download', (d) => downloads.push(d.suggestedFilename()));
+	await page.getByText('Download all (files)').click();
+	await expect
+		.poll(() => downloads.slice().sort())
+		.toEqual(['logo.webp', 'photo.webp']);
+});
+
 test('settings persist (format + language)', async ({ page }) => {
 	await page.goto('/');
 

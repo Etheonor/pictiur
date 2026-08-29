@@ -1,6 +1,15 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { Archive, Globe, Image, LoaderCircle, Play, TriangleAlert, X } from '@lucide/svelte';
+	import {
+		Archive,
+		Download,
+		Globe,
+		Image,
+		LoaderCircle,
+		Play,
+		TriangleAlert,
+		X
+	} from '@lucide/svelte';
 	import DropZone from '$lib/components/DropZone.svelte';
 	import SettingsPanel from '$lib/components/SettingsPanel.svelte';
 	import QueueItem from '$lib/components/QueueItem.svelte';
@@ -10,7 +19,12 @@
 	import { JobQueueController, type QueueJob } from '$lib/queue/controller';
 	import { settings, updateSettings } from '$lib/stores/settings.svelte';
 	import { saveSettings } from '$lib/stores/settings';
-	import { filesFromList, toPipelineOptions, type InputFile } from '$lib/utils/files';
+	import {
+		filesFromList,
+		outputFileName,
+		toPipelineOptions,
+		type InputFile
+	} from '$lib/utils/files';
 	import { buildZip } from '$lib/utils/zip';
 	import { createBrowserPool } from '$lib/workers';
 	import { t } from '$lib/i18n';
@@ -97,6 +111,19 @@
 			URL.revokeObjectURL(url);
 		} finally {
 			zipping = false;
+		}
+	}
+
+	function downloadAllFiles(): void {
+		// Synchronous loop: every click stays inside the user gesture, so the
+		// browser treats all downloads as user-initiated (a setTimeout would
+		// break that association and the later downloads would be blocked).
+		for (const job of jobs) {
+			if (job.status !== 'done' || !job.result) continue;
+			const a = document.createElement('a');
+			a.href = job.result.url;
+			a.download = outputFileName(job.name, job.result.mime);
+			a.click();
 		}
 	}
 
@@ -206,6 +233,15 @@
 									<Archive size={15} strokeWidth={1.75} aria-hidden="true" />
 									{t(settings.lang, 'result.downloadAll')}
 								{/if}
+							</button>
+							<button
+								type="button"
+								class="btn btn--secondary"
+								onclick={downloadAllFiles}
+								disabled={zipping}
+							>
+								<Download size={15} strokeWidth={1.75} aria-hidden="true" />
+								{t(settings.lang, 'result.downloadAllFiles')}
 							</button>
 							<button type="button" class="btn btn--ghost" onclick={clearFinished}>
 								{t(settings.lang, 'queue.clear')}

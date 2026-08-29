@@ -53,6 +53,7 @@ export const translations: Record<Lang, Record<string, string>> = {
 		'result.noGain': 'Pas plus petit que l’original',
 		'result.keepOriginal': 'Conserver l’original',
 		'result.downloadAll': 'Télécharger tout (ZIP)',
+		'result.downloadAllFiles': 'Télécharger tout (fichiers)',
 		'error.unsupported': '{name} : format non supporté',
 		'error.tooLarge': '{name} : fichier trop lourd (max 100 Mo)',
 		'error.ignored': '{n} fichier(s) ignoré(s)'
@@ -109,6 +110,7 @@ export const translations: Record<Lang, Record<string, string>> = {
 		'result.noGain': 'Not smaller than the original',
 		'result.keepOriginal': 'Keep the original',
 		'result.downloadAll': 'Download all (ZIP)',
+		'result.downloadAllFiles': 'Download all (files)',
 		'error.unsupported': '{name}: unsupported format',
 		'error.tooLarge': '{name}: file too large (max 100 MB)',
 		'error.ignored': '{n} file(s) ignored'

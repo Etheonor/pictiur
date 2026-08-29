@@ -239,7 +239,12 @@
 									onRemove={removeJob}
 								/>
 							{:else}
-								<QueueItem {job} position={i + 1} onRemove={removeJob} />
+								<QueueItem
+									{job}
+									position={i + 1}
+									inputUrl={inputUrls.get(job.id) ?? ''}
+									onRemove={removeJob}
+								/>
 							{/if}
 						{/each}
 					</div>
@@ -461,6 +466,14 @@
 		}
 		.layout {
 			grid-template-columns: 1fr;
+		}
+		/* Mobile: the staged files list comes right after the dropzone,
+		   above the settings panel (easier to reach). */
+		.layout :global(aside) {
+			order: 2;
+		}
+		.layout .queue {
+			order: 1;
 		}
 		.grid {
 			grid-template-columns: 1fr;

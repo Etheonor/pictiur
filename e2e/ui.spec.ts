@@ -21,9 +21,9 @@ test('drop files → results → zip download', async ({ page }) => {
 		{ name: 'logo.png', mimeType: 'image/png', buffer: TINY_PNG }
 	]);
 
-	// files are STAGED (no automatic processing on drop)
-	await expect(page.locator('article')).toHaveCount(2, { timeout: 30_000 });
-	await expect(page.getByText('Ready').first()).toBeVisible();
+	// files are STAGED: they appear in the summary (ready to launch)
+	await expect(page.locator('.summary__row')).toHaveCount(2, { timeout: 30_000 });
+	await expect(page.getByText('Ready to launch')).toBeVisible();
 
 	// launch the processing
 	await page.getByText(/Start processing \(2\)/).click();
@@ -65,9 +65,7 @@ test('download all individually (no ZIP)', async ({ page }) => {
 	const downloads: string[] = [];
 	page.on('download', (d) => downloads.push(d.suggestedFilename()));
 	await page.getByText('Download all (files)').click();
-	await expect
-		.poll(() => downloads.slice().sort())
-		.toEqual(['logo.webp', 'photo.webp']);
+	await expect.poll(() => downloads.slice().sort()).toEqual(['logo.webp', 'photo.webp']);
 });
 
 test('settings persist (format + language)', async ({ page }) => {

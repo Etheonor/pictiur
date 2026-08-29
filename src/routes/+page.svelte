@@ -12,6 +12,7 @@
 	} from '@lucide/svelte';
 	import DropZone from '$lib/components/DropZone.svelte';
 	import SettingsPanel from '$lib/components/SettingsPanel.svelte';
+	import StagedSummary from '$lib/components/StagedSummary.svelte';
 	import QueueItem from '$lib/components/QueueItem.svelte';
 	import ResultCard from '$lib/components/ResultCard.svelte';
 	import CompareModal from '$lib/components/CompareModal.svelte';
@@ -38,7 +39,8 @@
 	let compareJob = $state<QueueJob | null>(null);
 
 	const doneCount = $derived(jobs.filter((j) => j.status === 'done' && j.result).length);
-	const readyCount = $derived(jobs.filter((j) => j.status === 'ready').length);
+	const readyJobs = $derived(jobs.filter((j) => j.status === 'ready'));
+	const readyCount = $derived(readyJobs.length);
 	const processedCount = $derived(
 		jobs.filter((j) => ['done', 'error', 'aborted'].includes(j.status)).length
 	);
@@ -208,56 +210,64 @@
 		{/if}
 
 		<div class="layout">
-			<SettingsPanel {formats} />
+			<div class="layout__settings">
+				<SettingsPanel {formats} />
+			</div>
 
-			<section class="queue">
-				{#if readyCount > 0 || doneCount > 0}
-					<div class="actionbar">
-						{#if readyCount > 0}
-							<button type="button" class="btn btn--primary" onclick={launch}>
-								<Play size={14} strokeWidth={1.75} aria-hidden="true" />
-								{t(settings.lang, 'queue.launchCount', { n: String(readyCount) })}
-							</button>
-						{/if}
-						{#if doneCount > 0}
-							<button
-								type="button"
-								class="btn btn--secondary"
-								disabled={zipping}
-								onclick={downloadAll}
-							>
-								{#if zipping}
-									<LoaderCircle size={15} strokeWidth={1.75} class="spin" aria-hidden="true" />
-									{t(settings.lang, 'zip.preparing')}
-								{:else}
-									<Archive size={15} strokeWidth={1.75} aria-hidden="true" />
-									{t(settings.lang, 'result.downloadAll')}
-								{/if}
-							</button>
-							<button
-								type="button"
-								class="btn btn--secondary"
-								onclick={downloadAllFiles}
-								disabled={zipping}
-							>
-								<Download size={15} strokeWidth={1.75} aria-hidden="true" />
-								{t(settings.lang, 'result.downloadAllFiles')}
-							</button>
-							<button type="button" class="btn btn--ghost" onclick={clearFinished}>
-								{t(settings.lang, 'queue.clear')}
-							</button>
-						{/if}
-						{#if processedCount > 0}
-							<small class="count nums">
-								{t(settings.lang, 'queue.progressCount', {
-									done: String(processedCount),
-									total: String(jobs.length)
-								})}
-							</small>
-						{/if}
-					</div>
-				{/if}
+			{#if readyCount > 0}
+				<div class="layout__summary">
+					<StagedSummary jobs={readyJobs} {inputUrls} onRemove={removeJob} />
+				</div>
+			{/if}
 
+			{#if readyCount > 0 || doneCount > 0}
+				<div class="layout__actionbar actionbar">
+					{#if readyCount > 0}
+						<button type="button" class="btn btn--primary" onclick={launch}>
+							<Play size={14} strokeWidth={1.75} aria-hidden="true" />
+							{t(settings.lang, 'queue.launchCount', { n: String(readyCount) })}
+						</button>
+					{/if}
+					{#if doneCount > 0}
+						<button
+							type="button"
+							class="btn btn--secondary"
+							disabled={zipping}
+							onclick={downloadAll}
+						>
+							{#if zipping}
+								<LoaderCircle size={15} strokeWidth={1.75} class="spin" aria-hidden="true" />
+								{t(settings.lang, 'zip.preparing')}
+							{:else}
+								<Archive size={15} strokeWidth={1.75} aria-hidden="true" />
+								{t(settings.lang, 'result.downloadAll')}
+							{/if}
+						</button>
+						<button
+							type="button"
+							class="btn btn--secondary"
+							onclick={downloadAllFiles}
+							disabled={zipping}
+						>
+							<Download size={15} strokeWidth={1.75} aria-hidden="true" />
+							{t(settings.lang, 'result.downloadAllFiles')}
+						</button>
+						<button type="button" class="btn btn--ghost" onclick={clearFinished}>
+							{t(settings.lang, 'queue.clear')}
+						</button>
+					{/if}
+					{#if processedCount > 0}
+						<small class="count nums">
+							{t(settings.lang, 'queue.progressCount', {
+								done: String(processedCount),
+								total: String(jobs.length)
+							})}
+						</small>
+					{/if}
+				</div>
+			{/if}
+
+			<section class="layout__results">
 				{#if jobs.length === 0}
 					<div class="empty">
 						<Image size={48} strokeWidth={1.25} aria-hidden="true" class="empty__icon" />
@@ -274,7 +284,7 @@
 									onCompare={(j) => (compareJob = j)}
 									onRemove={removeJob}
 								/>
-							{:else}
+							{:else if job.status === 'queued' || job.status === 'processing'}
 								<QueueItem
 									{job}
 									position={i + 1}
@@ -414,14 +424,31 @@
 		color: var(--warn-text);
 	}
 
-	/* --- Settings + queue layout --- */
+	/* --- Layout: settings + summary + actionbar + results --- */
 	.layout {
 		display: grid;
 		grid-template-columns: 320px 1fr;
+		grid-template-areas:
+			'settings summary'
+			'settings actionbar'
+			'settings results';
 		gap: 24px;
 		align-items: start;
 	}
-	.queue {
+	.layout__settings {
+		grid-area: settings;
+		min-width: 0;
+	}
+	.layout__summary {
+		grid-area: summary;
+		min-width: 0;
+	}
+	.layout__actionbar {
+		grid-area: actionbar;
+		min-width: 0;
+	}
+	.layout__results {
+		grid-area: results;
 		min-width: 0;
 		display: flex;
 		flex-direction: column;
@@ -502,14 +529,12 @@
 		}
 		.layout {
 			grid-template-columns: 1fr;
-		}
-		/* Mobile: the staged files list comes right after the dropzone,
-		   above the settings panel (easier to reach). */
-		.layout :global(aside) {
-			order: 2;
-		}
-		.layout .queue {
-			order: 1;
+			/* Mobile flow: summary → settings → actionbar → results */
+			grid-template-areas:
+				'summary'
+				'settings'
+				'actionbar'
+				'results';
 		}
 		.grid {
 			grid-template-columns: 1fr;

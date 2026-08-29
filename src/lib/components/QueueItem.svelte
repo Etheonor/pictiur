@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { Clock, X } from '@lucide/svelte';
+	import FileThumb from './FileThumb.svelte';
 	import { t } from '$lib/i18n';
 	import { settings } from '$lib/stores/settings.svelte';
 	import type { QueueJob } from '$lib/queue/controller';
@@ -18,18 +19,10 @@
 
 	const statusLabel = $derived(t(settings.lang, `job.${job.status}`));
 	const formatLabel = $derived(job.format.toUpperCase());
-	const ext = $derived((job.name.split('.').pop() ?? '').toUpperCase());
-	let thumbFailed = $state(false);
 </script>
 
 <article class="queue-item queue-item--{job.status}" aria-busy={job.status === 'processing'}>
-	<div class="thumb" aria-hidden="true">
-		{#if thumbFailed}
-			<span class="thumb__ext">{ext}</span>
-		{:else}
-			<img src={inputUrl} alt="" loading="lazy" onerror={() => (thumbFailed = true)} />
-		{/if}
-	</div>
+	<FileThumb src={inputUrl} name={job.name} />
 
 	<div class="body">
 		<div class="row">
@@ -96,30 +89,6 @@
 	.queue-item--processing {
 		background: var(--surface);
 		border: 1px solid var(--border);
-	}
-
-	.thumb {
-		flex: none;
-		width: 56px;
-		height: 56px;
-		border-radius: 8px;
-		background: var(--surface-input);
-		border: 1px solid var(--border-input);
-		overflow: hidden;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-	}
-	.thumb img {
-		width: 100%;
-		height: 100%;
-		object-fit: cover;
-	}
-	.thumb__ext {
-		font-size: 10px;
-		font-weight: 700;
-		letter-spacing: 0.04em;
-		color: var(--text-3);
 	}
 
 	.body {

@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.2.0] — 2026-08-29
+
+### Added
+
+- **Download all images individually** (next to the ZIP button)
+- Staged file **summary with thumbnails**; mobile flow: dropzone → summary → settings → buttons → results
+
+### Fixed
+
+- Comparison now **decodes HEIC inputs** for the "before" preview (no more broken image)
+- HEIC/HEIF listed in the dropzone accepted formats
+- Long filenames ellipsize instead of overflowing (no horizontal scroll)
+
 ## [1.1.0] — 2026-08-28
 
 ### Added

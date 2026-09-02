@@ -98,9 +98,13 @@ export class JobQueueController {
 	start(options?: PipelineOptions): void {
 		for (const job of this.jobs) {
 			if (job.status !== 'ready') continue;
-			job.status = 'queued';
 			const input = this.inputs.get(job.id);
-			if (input) void this.run(options ? { ...input, options } : input, job);
+			if (!input) continue;
+			const eff = options ? { ...input, options } : input;
+			// Reflect the launch-time target so the badge/progress match the real output.
+			job.format = eff.options.targetFormat;
+			job.status = 'queued';
+			void this.run(eff, job);
 		}
 		this.notify();
 	}

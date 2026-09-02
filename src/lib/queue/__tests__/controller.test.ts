@@ -78,7 +78,10 @@ describe('JobQueueController', () => {
 		const pool = new FakePool(0);
 		const controller = new JobQueueController({ pool: pool as never });
 		controller.add([input('a.png', 'webp')]); // drop-time setting
+		expect(controller.jobs[0].format).toBe('webp');
 		controller.start({ targetFormat: 'jpeg', quality: 80 }); // launch-time setting
+		// the badge/progress reflect the real launch-time target, not the drop-time one
+		expect(controller.jobs[0].format).toBe('jpeg');
 		await vi.waitFor(() => expect(pool.submitted).toHaveLength(1));
 		expect(pool.submitted[0].options).toMatchObject({ targetFormat: 'jpeg', quality: 80 });
 	});

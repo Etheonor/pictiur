@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.3.0] — 2026-08-29
+
+### Added
+
+- **Per-file rotation (90/180/270) & flip (H/V)** with a live thumbnail preview and a state badge — applied in-pixel, before resize
+- **FAQ** (privacy · formats · limits · offline), reachable in the page footer
+- Privacy proof: re-encoding verified to drop any `Exif` signature from the output
+
+### Fixed
+
+- The output-format badge no longer sticks to the drop-time format when the target is changed before launching
+
 ## [1.2.0] — 2026-08-29
 
 ### Added

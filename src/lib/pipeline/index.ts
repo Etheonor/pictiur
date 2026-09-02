@@ -5,6 +5,7 @@ import { LIMITS, resolveOptions, validateOptions } from './job';
 import type { PipelineInput, PipelineResult } from './job';
 import { buildResizeSteps, centerCrop, planResize, resizeRgba } from './resize';
 import { encodeToTarget } from './target-size';
+import { applyTransform } from './transform';
 
 export interface PipelineEnv {
 	/** Decodes a Blob to RGBA (default: createImageBitmap + OffscreenCanvas, browser/worker). */
@@ -81,14 +82,17 @@ export async function runPipeline(
 	ensureActive();
 	const inputSize = input.file.size;
 
-	// resize (plan + pyramidal steps)
+	// transform: per-file rotate/flip on display pixels, BEFORE resize
 	const options = resolveOptions(input.options);
-	const plan = planResize(source, options.fit, options.maxWidth, options.maxHeight);
+	let rgba = applyTransform(source, options.transform);
+	ensureActive();
+
+	// resize (plan + pyramidal steps) — geometry computed on the transformed dims
+	const plan = planResize(rgba, options.fit, options.maxWidth, options.maxHeight);
 	onProgress(30);
-	let rgba = source;
 	if (plan) {
 		onProgress(45);
-		for (const step of buildResizeSteps(source, plan)) {
+		for (const step of buildResizeSteps(rgba, plan)) {
 			rgba = await resize(rgba, step.width, step.height);
 			ensureActive();
 			onProgress(50);

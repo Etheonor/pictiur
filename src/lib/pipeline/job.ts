@@ -1,4 +1,6 @@
 import type { EncodeOptions } from '../codecs/types';
+import type { ImageTransform } from './transform';
+import { IDENTITY_TRANSFORM } from './transform';
 
 export type FitMode = 'contain' | 'cover' | 'fill';
 
@@ -8,6 +10,7 @@ export interface PipelineOptions extends Partial<EncodeOptions> {
 	maxWidth?: number; // px
 	maxHeight?: number; // px
 	maxWeightKB?: number; // target-size mode: quality bisection
+	transform?: ImageTransform; // per-file rotate/flip (default identity)
 }
 
 export interface PipelineInput {
@@ -57,18 +60,27 @@ export function validateOptions(options: PipelineOptions): ValidationResult {
 		errors.push('maxWeightKB must be >= 1');
 	if (options.effort !== undefined && (options.effort < 0 || options.effort > 10))
 		errors.push('effort must be in [0, 10]');
+	const rotate = options.transform?.rotate;
+	if (rotate !== undefined && rotate !== 0 && rotate !== 90 && rotate !== 180 && rotate !== 270)
+		errors.push('transform.rotate must be 0 | 90 | 180 | 270');
+	if (options.transform?.flipH !== undefined && typeof options.transform.flipH !== 'boolean')
+		errors.push('transform.flipH must be boolean');
+	if (options.transform?.flipV !== undefined && typeof options.transform.flipV !== 'boolean')
+		errors.push('transform.flipV must be boolean');
 	return { ok: errors.length === 0, errors };
 }
 
 export interface ResolvedOptions extends PipelineOptions {
 	fit: FitMode;
 	quality: number;
+	transform: ImageTransform;
 }
 
 export function resolveOptions(options: PipelineOptions): ResolvedOptions {
 	return {
 		...options,
 		fit: options.fit ?? 'contain',
-		quality: options.quality ?? 80
+		quality: options.quality ?? 80,
+		transform: options.transform ?? IDENTITY_TRANSFORM
 	};
 }

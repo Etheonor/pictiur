@@ -1,5 +1,10 @@
 <script lang="ts">
-	let { src, name, size = 56 }: { src: string; name: string; size?: number } = $props();
+	let {
+		src,
+		name,
+		size = 56,
+		imageStyle
+	}: { src: string; name: string; size?: number; imageStyle?: string } = $props();
 
 	const ext = $derived((name.split('.').pop() ?? '').toUpperCase());
 	let failed = $state(false);
@@ -9,7 +14,7 @@
 	{#if failed}
 		<span class="thumb__ext">{ext}</span>
 	{:else}
-		<img {src} alt="" loading="lazy" onerror={() => (failed = true)} />
+		<img {src} alt="" loading="lazy" style={imageStyle ?? ''} onerror={() => (failed = true)} />
 	{/if}
 </div>
 

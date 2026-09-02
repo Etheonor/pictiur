@@ -16,8 +16,10 @@
 	import QueueItem from '$lib/components/QueueItem.svelte';
 	import ResultCard from '$lib/components/ResultCard.svelte';
 	import CompareModal from '$lib/components/CompareModal.svelte';
+	import Faq from '$lib/components/Faq.svelte';
 	import { listCodecs } from '$lib/codecs';
 	import { JobQueueController, type QueueJob } from '$lib/queue/controller';
+	import type { ImageTransform } from '$lib/pipeline/transform';
 	import { settings, updateSettings } from '$lib/stores/settings.svelte';
 	import { saveSettings } from '$lib/stores/settings';
 	import {
@@ -34,6 +36,7 @@
 	let formats: { id: string; label: string }[] = $state([]);
 	let jobs = $state<QueueJob[]>([]);
 	let inputUrls = $state<Map<string, string>>(new Map());
+	let transforms = $state<Map<string, ImageTransform>>(new Map());
 	let errors = $state<string[]>([]);
 	let zipping = $state(false);
 	let compareJob = $state<QueueJob | null>(null);
@@ -78,7 +81,15 @@
 				ids[i],
 				URL.createObjectURL(new Blob([files[i].buffer], { type: files[i].mime }))
 			);
+			transforms.set(ids[i], { rotate: 0, flipH: false, flipV: false });
 		}
+	}
+
+	function onTransform(id: string, patch: Partial<ImageTransform>): void {
+		const cur = transforms.get(id) ?? { rotate: 0, flipH: false, flipV: false };
+		const next: ImageTransform = { ...cur, ...patch };
+		transforms.set(id, next);
+		controller?.setTransform(id, next);
 	}
 
 	function toJobInput(file: InputFile) {
@@ -136,6 +147,7 @@
 				const url = inputUrls.get(job.id);
 				if (url) URL.revokeObjectURL(url);
 				inputUrls.delete(job.id);
+				transforms.delete(job.id);
 			}
 		}
 		controller.clearFinished();
@@ -146,6 +158,7 @@
 		const url = inputUrls.get(id);
 		if (url) URL.revokeObjectURL(url);
 		inputUrls.delete(id);
+		transforms.delete(id);
 		if (compareJob?.id === id) compareJob = null;
 		controller?.removeJob(id);
 	}
@@ -216,7 +229,13 @@
 
 			{#if readyCount > 0}
 				<div class="layout__summary">
-					<StagedSummary jobs={readyJobs} {inputUrls} onRemove={removeJob} />
+					<StagedSummary
+						jobs={readyJobs}
+						{inputUrls}
+						{transforms}
+						onRemove={removeJob}
+						{onTransform}
+					/>
 				</div>
 			{/if}
 
@@ -297,6 +316,8 @@
 				{/if}
 			</section>
 		</div>
+
+		<Faq />
 	</main>
 </div>
 

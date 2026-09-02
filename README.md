@@ -5,6 +5,7 @@ Optimize images 100% locally — convert, resize and compress in one pass, right
 - 🔒 **No upload**: processing runs locally in your browser (WebAssembly)
 - ⚡ **PWA**: installable, works offline
 - 🧩 **Formats**: JPEG (mozjpeg), PNG (oxipng), WebP, AVIF, JPEG XL; **HEIC/HEIF** (iPhone) input via WebAssembly
+- 🔄 **Transform**: rotate (90/180/270) & mirror (H/V) per image, before the batch launch
 
 ## Development
 

@@ -86,6 +86,46 @@ describe('JobQueueController', () => {
 		expect(pool.submitted[0].options).toMatchObject({ targetFormat: 'jpeg', quality: 80 });
 	});
 
+	it('setTransform survives a launch-time re-application of global settings', async () => {
+		const pool = new FakePool(0);
+		const controller = new JobQueueController({ pool: pool as never });
+		const [id] = controller.add([input('a.png', 'webp')]);
+		controller.setTransform(id, { rotate: 90, flipH: true, flipV: false });
+		controller.start({ targetFormat: 'jpeg', quality: 80 });
+		await vi.waitFor(() => expect(pool.submitted).toHaveLength(1));
+		expect(pool.submitted[0].options).toMatchObject({
+			targetFormat: 'jpeg',
+			transform: { rotate: 90, flipH: true }
+		});
+	});
+
+	it('setTransform defaults to identity when never set', async () => {
+		const pool = new FakePool(0);
+		const controller = new JobQueueController({ pool: pool as never });
+		controller.add([input('a.png', 'webp')]);
+		controller.start({ targetFormat: 'jpeg' });
+		await vi.waitFor(() => expect(pool.submitted).toHaveLength(1));
+		expect((pool.submitted[0].options as { transform?: unknown }).transform).toEqual({
+			rotate: 0,
+			flipH: false,
+			flipV: false
+		});
+	});
+
+	it('setTransform is a no-op once the job has launched (frozen at start)', async () => {
+		const pool = new FakePool(30); // stays in-flight
+		const controller = new JobQueueController({ pool: pool as never });
+		const [id] = controller.add([input('a.png', 'webp')]);
+		controller.setTransform(id, { rotate: 90 });
+		controller.start();
+		await vi.waitFor(() => expect(pool.submitted).toHaveLength(1));
+		// launched → a later setTransform must not affect the in-flight job's payload
+		controller.setTransform(id, { rotate: 270 });
+		expect((pool.submitted[0].options as { transform?: unknown }).transform).toEqual({
+			rotate: 90
+		});
+	});
+
 	it('marks a job as error when the pool rejects', async () => {
 		const pool = new FakePool(1, true);
 		const controller = new JobQueueController({ pool: pool as never });

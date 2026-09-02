@@ -47,6 +47,10 @@ export const translations: Record<Lang, Record<string, string>> = {
 		'job.done': 'Terminé',
 		'job.error': 'Erreur',
 		'job.aborted': 'Annulé',
+		'transform.rotateLeft': 'Pivoter à gauche (−90°)',
+		'transform.rotateRight': 'Pivoter à droite (+90°)',
+		'transform.flipH': 'Miroir horizontal',
+		'transform.flipV': 'Miroir vertical',
 		'result.saved': '−{pct} %',
 		'result.download': 'Télécharger',
 		'result.compare': 'Comparer',
@@ -57,7 +61,25 @@ export const translations: Record<Lang, Record<string, string>> = {
 		'result.downloadAllFiles': 'Télécharger tout (fichiers)',
 		'error.unsupported': '{name} : format non supporté',
 		'error.tooLarge': '{name} : fichier trop lourd (max 100 Mo)',
-		'error.ignored': '{n} fichier(s) ignoré(s)'
+		'error.ignored': '{n} fichier(s) ignoré(s)',
+		'faq.title': 'FAQ',
+		'faq.q1': 'Mes images sont-elles envoyées sur un serveur ?',
+		'faq.a1':
+			'Non. Tout le traitement se fait dans votre navigateur, en local — même sur une instance hébergée, aucune image ne quitte votre appareil.',
+		'faq.q2': 'Et les métadonnées EXIF / GPS ?',
+		'faq.a2':
+			'Elles ne sont jamais conservées : nous ré-encodons à partir des pixels, donc aucune métadonnée (ni GPS, ni orientation, ni modèle d’appareil) n’est ré-embarquée. C’est structurel, pas une option.',
+		'faq.q3': 'Quels formats sont supportés ?',
+		'faq.a3':
+			'Entrée : JPEG, PNG, WebP, GIF, SVG, BMP, AVIF et HEIC/HEIF (iPhone). Sortie : JPEG, WebP, PNG, AVIF et JPEG XL.',
+		'faq.q4': 'Y a-t-il des limites ?',
+		'faq.a4': 'Oui : 100 Mo par fichier, 24 000 px par côté et 150 mégapixels maximum.',
+		'faq.q5': 'Fonctionne-t-il hors-ligne ?',
+		'faq.a5':
+			'Oui — c’est une PWA installable qui pré-cache son code : une fois chargée, elle marche sans connexion.',
+		'faq.q6': 'Pourquoi ré-encoder alors que je veux juste pivoter une image ?',
+		'faq.a6':
+			'Le ré-encodage garantit une image propre (métadonnées retirées, orientation figée dans les pixels) et permet les formats modernes (WebP/AVIF) — c’est aussi ce qui rend la rotation fiable.'
 	},
 	en: {
 		'app.title': 'Pictiúr — optimize your images, 100% locally',
@@ -105,6 +127,10 @@ export const translations: Record<Lang, Record<string, string>> = {
 		'job.done': 'Done',
 		'job.error': 'Error',
 		'job.aborted': 'Aborted',
+		'transform.rotateLeft': 'Rotate left (−90°)',
+		'transform.rotateRight': 'Rotate right (+90°)',
+		'transform.flipH': 'Flip horizontal',
+		'transform.flipV': 'Flip vertical',
 		'result.saved': '−{pct} %',
 		'result.download': 'Download',
 		'result.compare': 'Compare',
@@ -115,7 +141,25 @@ export const translations: Record<Lang, Record<string, string>> = {
 		'result.downloadAllFiles': 'Download all (files)',
 		'error.unsupported': '{name}: unsupported format',
 		'error.tooLarge': '{name}: file too large (max 100 MB)',
-		'error.ignored': '{n} file(s) ignored'
+		'error.ignored': '{n} file(s) ignored',
+		'faq.title': 'FAQ',
+		'faq.q1': 'Are my images uploaded to a server?',
+		'faq.a1':
+			'No. All processing happens locally in your browser — even on a hosted instance, no image ever leaves your device.',
+		'faq.q2': 'What about EXIF / GPS metadata?',
+		'faq.a2':
+			'It is never kept: we re-encode from the pixels, so no metadata (GPS, orientation, camera model…) is re-embedded. This is structural, not an option.',
+		'faq.q3': 'Which formats are supported?',
+		'faq.a3':
+			'Input: JPEG, PNG, WebP, GIF, SVG, BMP, AVIF and HEIC/HEIF (iPhone). Output: JPEG, WebP, PNG, AVIF and JPEG XL.',
+		'faq.q4': 'Are there limits?',
+		'faq.a4': 'Yes: 100 MB per file, 24,000 px per side and up to 150 megapixels.',
+		'faq.q5': 'Does it work offline?',
+		'faq.a5':
+			'Yes — it is an installable PWA that pre-caches its code: once loaded, it works without a connection.',
+		'faq.q6': 'Why re-encode when I just want to rotate an image?',
+		'faq.a6':
+			'Re-encoding guarantees a clean image (metadata stripped, orientation baked into the pixels) and enables modern formats (WebP/AVIF) — it is also what makes rotation reliable.'
 	}
 };
 

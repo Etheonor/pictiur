@@ -1,6 +1,7 @@
 import type { WorkerJob } from '../workers/codec.worker';
 import type { PoolResult } from '../workers/pool';
 import type { PipelineOptions } from '../pipeline/job';
+import { IDENTITY_TRANSFORM, type ImageTransform } from '../pipeline/transform';
 
 export type JobStatus = 'ready' | 'queued' | 'processing' | 'done' | 'error' | 'aborted';
 
@@ -100,12 +101,28 @@ export class JobQueueController {
 			if (job.status !== 'ready') continue;
 			const input = this.inputs.get(job.id);
 			if (!input) continue;
-			const eff = options ? { ...input, options } : input;
+			// Per-file transform survives a launch-time re-application of global settings:
+			// merge (options ?? drop-time), then re-attach the per-file transform.
+			const merged: PipelineOptions = {
+				...(options ?? input.options),
+				transform: input.options.transform ?? IDENTITY_TRANSFORM
+			};
+			const eff: QueueJobInput = { ...input, options: merged };
 			// Reflect the launch-time target so the badge/progress match the real output.
-			job.format = eff.options.targetFormat;
+			job.format = merged.targetFormat;
 			job.status = 'queued';
 			void this.run(eff, job);
 		}
+		this.notify();
+	}
+
+	/** Sets a file's rotate/flip. Only valid while the job is `ready` (frozen once launched). */
+	setTransform(id: string, transform: ImageTransform): void {
+		const job = this.jobs.find((j) => j.id === id);
+		if (!job || job.status !== 'ready') return;
+		const input = this.inputs.get(id);
+		if (!input) return;
+		input.options = { ...input.options, transform };
 		this.notify();
 	}
 

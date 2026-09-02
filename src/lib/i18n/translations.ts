@@ -80,7 +80,7 @@ export const translations: Record<Lang, Record<string, string>> = {
 			'Oui — c’est une PWA installable qui pré-cache son code : une fois chargée, elle marche sans connexion.',
 		'faq.q6': 'Pourquoi ré-encoder alors que je veux juste pivoter une image ?',
 		'faq.a6':
-			'Le ré-encodage garantit une image propre (métadonnées retirées, orientation figée dans les pixels) et permet les formats modernes (WebP/AVIF) — c’est aussi ce qui rend la rotation fiable.'
+			'Le ré-encodage écrit l’orientation directement dans les pixels et ne conserve pas le tag EXIF « Orientation ». Votre image pivotée s’affiche donc à l’endroit partout — contrairement aux photos iPhone qui apparaissent couchées dans certaines applis. C’est aussi ce qui permet de produire les formats modernes (WebP/AVIF).'
 	},
 	en: {
 		'app.title': 'Pictiúr — optimize your images, 100% locally',
@@ -161,7 +161,7 @@ export const translations: Record<Lang, Record<string, string>> = {
 			'Yes — it is an installable PWA that pre-caches its code: once loaded, it works without a connection.',
 		'faq.q6': 'Why re-encode when I just want to rotate an image?',
 		'faq.a6':
-			'Re-encoding guarantees a clean image (metadata stripped, orientation baked into the pixels) and enables modern formats (WebP/AVIF) — it is also what makes rotation reliable.'
+			'Re-encoding bakes the orientation straight into the pixels and does not keep the EXIF “Orientation” tag. So your rotated image displays upright everywhere — unlike iPhone photos that show up sideways in some apps. This is also what lets us produce modern formats (WebP/AVIF).'
 	}
 };
 

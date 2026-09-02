@@ -51,7 +51,7 @@ test('per-file rotate button shows a badge then produces the result', async ({ p
 	});
 
 	// staged: no transform badge yet
-	await expect(page.locator('.summary__row')).toHaveCount(1);
+	await expect(page.locator('.tile')).toHaveCount(1);
 	await expect(page.getByText('90°')).toHaveCount(0);
 
 	// rotate right once → badge "90°" + active state

@@ -22,7 +22,7 @@ test('drop files → results → zip download', async ({ page }) => {
 	]);
 
 	// files are STAGED: they appear in the summary (ready to launch)
-	await expect(page.locator('.summary__row')).toHaveCount(2, { timeout: 30_000 });
+	await expect(page.locator('.tile')).toHaveCount(2, { timeout: 30_000 });
 	await expect(page.getByText('Ready to launch')).toBeVisible();
 
 	// launch the processing

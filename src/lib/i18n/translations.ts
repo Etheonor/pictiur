@@ -63,9 +63,10 @@ export const translations: Record<Lang, Record<string, string>> = {
 		'error.tooLarge': '{name} : fichier trop lourd (max 100 Mo)',
 		'error.ignored': '{n} fichier(s) ignoré(s)',
 		'faq.title': 'FAQ',
+		'faq.subtitle': 'Confidentialité, formats, limites',
 		'faq.q1': 'Mes images sont-elles envoyées sur un serveur ?',
 		'faq.a1':
-			'Non. Tout le traitement se fait dans votre navigateur, en local — même sur une instance hébergée, aucune image ne quitte votre appareil.',
+			'Non. Tout le traitement se fait dans votre navigateur, en local, même sur une instance hébergée, aucune image ne quitte votre appareil.',
 		'faq.q2': 'Et les métadonnées EXIF / GPS ?',
 		'faq.a2':
 			'Elles ne sont jamais conservées : nous ré-encodons à partir des pixels, donc aucune métadonnée (ni GPS, ni orientation, ni modèle d’appareil) n’est ré-embarquée. C’est structurel, pas une option.',
@@ -143,9 +144,10 @@ export const translations: Record<Lang, Record<string, string>> = {
 		'error.tooLarge': '{name}: file too large (max 100 MB)',
 		'error.ignored': '{n} file(s) ignored',
 		'faq.title': 'FAQ',
+		'faq.subtitle': 'Privacy, formats, limits',
 		'faq.q1': 'Are my images uploaded to a server?',
 		'faq.a1':
-			'No. All processing happens locally in your browser — even on a hosted instance, no image ever leaves your device.',
+			'No. All processing happens locally in your browser, even on a hosted instance, no image ever leaves your device.',
 		'faq.q2': 'What about EXIF / GPS metadata?',
 		'faq.a2':
 			'It is never kept: we re-encode from the pixels, so no metadata (GPS, orientation, camera model…) is re-embedded. This is structural, not an option.',

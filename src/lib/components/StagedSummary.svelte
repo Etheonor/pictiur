@@ -44,26 +44,37 @@
 		>
 	</header>
 
-	<ul class="summary__list">
+	<ul class="summary__grid">
 		{#each jobs as job (job.id)}
 			{@const tr = transformOf(job.id)}
-			<li class="summary__row">
-				<FileThumb
-					src={inputUrls.get(job.id) ?? ''}
-					name={job.name}
-					size={40}
-					imageStyle={thumbStyle(tr)}
-				/>
-				<div class="summary__meta">
-					<span class="summary__name" title={job.name}>{job.name}</span>
-					<small class="nums summary__size">
-						{formatBytes(job.inputSize, settings.lang)}
-						{#if !isIdentity(tr)}
-							<span class="summary__badge">{badge(tr)}</span>
-						{/if}
-					</small>
+			<li class="tile">
+				<div class="tile__preview">
+					<FileThumb
+						src={inputUrls.get(job.id) ?? ''}
+						name={job.name}
+						fluid
+						fit="contain"
+						imageStyle={thumbStyle(tr)}
+					/>
+					{#if !isIdentity(tr)}
+						<span class="tile__badge">{badge(tr)}</span>
+					{/if}
+					<button
+						type="button"
+						class="tile__remove"
+						aria-label={t(settings.lang, 'queue.remove')}
+						onclick={() => onRemove(job.id)}
+					>
+						<X size={14} strokeWidth={1.75} aria-hidden="true" />
+					</button>
 				</div>
-				<div class="summary__tools">
+
+				<div class="tile__info">
+					<span class="tile__name" title={job.name}>{job.name}</span>
+					<small class="nums tile__size">{formatBytes(job.inputSize, settings.lang)}</small>
+				</div>
+
+				<div class="tile__tools">
 					<button
 						type="button"
 						class="tool"
@@ -74,7 +85,7 @@
 								rotate: (((tr.rotate ?? 0) + 270) % 360) as 0 | 90 | 180 | 270
 							})}
 					>
-						<RotateCcw size={14} strokeWidth={1.75} aria-hidden="true" />
+						<RotateCcw size={15} strokeWidth={1.75} aria-hidden="true" />
 					</button>
 					<button
 						type="button"
@@ -86,7 +97,7 @@
 								rotate: (((tr.rotate ?? 0) + 90) % 360) as 0 | 90 | 180 | 270
 							})}
 					>
-						<RotateCw size={14} strokeWidth={1.75} aria-hidden="true" />
+						<RotateCw size={15} strokeWidth={1.75} aria-hidden="true" />
 					</button>
 					<button
 						type="button"
@@ -96,7 +107,7 @@
 						aria-label={t(settings.lang, 'transform.flipH')}
 						onclick={() => onTransform(job.id, { flipH: !tr.flipH })}
 					>
-						<FlipHorizontal2 size={14} strokeWidth={1.75} aria-hidden="true" />
+						<FlipHorizontal2 size={15} strokeWidth={1.75} aria-hidden="true" />
 					</button>
 					<button
 						type="button"
@@ -106,15 +117,7 @@
 						aria-label={t(settings.lang, 'transform.flipV')}
 						onclick={() => onTransform(job.id, { flipV: !tr.flipV })}
 					>
-						<FlipVertical2 size={14} strokeWidth={1.75} aria-hidden="true" />
-					</button>
-					<button
-						type="button"
-						class="summary__remove"
-						aria-label={t(settings.lang, 'queue.remove')}
-						onclick={() => onRemove(job.id)}
-					>
-						<X size={14} strokeWidth={1.75} aria-hidden="true" />
+						<FlipVertical2 size={15} strokeWidth={1.75} aria-hidden="true" />
 					</button>
 				</div>
 			</li>
@@ -131,7 +134,7 @@
 		padding: 16px;
 		display: flex;
 		flex-direction: column;
-		gap: 12px;
+		gap: 14px;
 	}
 	.summary__header {
 		display: flex;
@@ -148,87 +151,103 @@
 		font-size: 12px;
 		color: var(--text-3);
 	}
-	.summary__list {
+	.summary__grid {
 		list-style: none;
 		margin: 0;
 		padding: 0;
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+		gap: 14px;
+	}
+
+	.tile {
 		display: flex;
 		flex-direction: column;
-		gap: 8px;
-	}
-	.summary__row {
-		display: flex;
-		align-items: center;
 		gap: 10px;
 		min-width: 0;
 	}
-	.summary__meta {
-		flex: 1;
-		min-width: 0;
-		display: flex;
-		flex-direction: column;
-		gap: 2px;
-	}
-	.summary__name {
+	.tile__preview {
+		position: relative;
+		aspect-ratio: 1 / 1;
+		border-radius: 10px;
 		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
-		font-size: 13px;
-		color: var(--text);
+		background: var(--surface-dim);
+		border: 1px solid var(--border-input);
 	}
-	.summary__size {
+	.tile__badge {
+		position: absolute;
+		top: 8px;
+		left: 8px;
 		font-size: 11px;
-		color: var(--text-4);
-	}
-	.summary__badge {
-		margin-left: 6px;
-		padding: 1px 6px;
-		border-radius: var(--r-pill);
-		background: var(--accent-tint-14);
-		color: var(--accent);
 		font-weight: 600;
+		padding: 3px 8px;
+		border-radius: var(--r-pill);
+		background: rgba(12, 31, 26, 0.85);
+		color: var(--accent);
+		backdrop-filter: blur(4px);
 	}
-	.summary__tools {
-		flex: none;
-		display: flex;
-		align-items: center;
-		gap: 2px;
-	}
-	.tool {
+	.tile__remove {
+		position: absolute;
+		top: 8px;
+		right: 8px;
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
 		width: 26px;
 		height: 26px;
-		border-radius: 6px;
-		color: var(--text-3);
+		border-radius: 50%;
+		background: rgba(0, 0, 0, 0.55);
+		color: #fff;
+		backdrop-filter: blur(4px);
+		transition: background-color var(--dur) var(--ease);
+	}
+	.tile__remove:hover {
+		background: var(--danger);
+	}
+	.tile__info {
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+		min-width: 0;
+	}
+	.tile__name {
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		font-size: 13px;
+		font-weight: 500;
+		color: var(--text);
+	}
+	.tile__size {
+		font-size: 11px;
+		color: var(--text-4);
+	}
+	.tile__tools {
+		display: flex;
+		gap: 4px;
+	}
+	.tool {
+		flex: 1;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		height: 34px;
+		border-radius: 8px;
+		background: var(--surface-input);
+		border: 1px solid var(--border-input);
+		color: var(--text-2);
 		transition:
 			background-color var(--dur) var(--ease),
+			border-color var(--dur) var(--ease),
 			color var(--dur) var(--ease);
 	}
 	.tool:hover {
-		background: var(--surface);
+		border-color: var(--border-hover);
 		color: var(--text);
 	}
 	.tool--on {
 		background: var(--accent-tint-14);
+		border-color: var(--accent);
 		color: var(--accent);
-	}
-	.summary__remove {
-		flex: none;
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		width: 28px;
-		height: 28px;
-		border-radius: 7px;
-		color: var(--text-4);
-		transition:
-			background-color var(--dur) var(--ease),
-			color var(--dur) var(--ease);
-	}
-	.summary__remove:hover {
-		background: var(--surface);
-		color: var(--danger-text);
 	}
 </style>

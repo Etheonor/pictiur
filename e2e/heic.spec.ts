@@ -17,7 +17,7 @@ test('decodes a real HEIC and exports it (full UI)', async ({ page }) => {
 	});
 
 	// staged flow: the file is ready (summary), then we launch the processing
-	await expect(page.locator('.summary__row')).toHaveCount(1);
+	await expect(page.locator('.tile')).toHaveCount(1);
 	await page.getByText(/Start processing \(1\)/).click();
 
 	// WASM decode + default webp encode → result card

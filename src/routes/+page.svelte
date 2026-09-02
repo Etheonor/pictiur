@@ -1,26 +1,17 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import {
-		Archive,
-		Download,
-		Globe,
-		Image,
-		LoaderCircle,
-		Play,
-		TriangleAlert,
-		X
-	} from '@lucide/svelte';
+	import { Archive, Download, Image, LoaderCircle, Play, TriangleAlert, X } from '@lucide/svelte';
 	import DropZone from '$lib/components/DropZone.svelte';
+	import Header from '$lib/components/Header.svelte';
 	import SettingsPanel from '$lib/components/SettingsPanel.svelte';
 	import StagedSummary from '$lib/components/StagedSummary.svelte';
 	import QueueItem from '$lib/components/QueueItem.svelte';
 	import ResultCard from '$lib/components/ResultCard.svelte';
 	import CompareModal from '$lib/components/CompareModal.svelte';
-	import Faq from '$lib/components/Faq.svelte';
 	import { listCodecs } from '$lib/codecs';
 	import { JobQueueController, type QueueJob } from '$lib/queue/controller';
 	import type { ImageTransform } from '$lib/pipeline/transform';
-	import { settings, updateSettings } from '$lib/stores/settings.svelte';
+	import { settings } from '$lib/stores/settings.svelte';
 	import { saveSettings } from '$lib/stores/settings';
 	import {
 		filesFromList,
@@ -170,32 +161,8 @@
 </script>
 
 <div class="app">
-	<header class="topbar">
-		<div class="brand">
-			<h1 class="sr-only">Pictiúr</h1>
-			<img src="/logo/pictiur-wordmark-dark-bg.svg" alt="Pictiúr" class="brand__logo" />
-			<span class="brand__badge">{t(settings.lang, 'badge.offline')}</span>
-		</div>
-		<div class="lang" role="group" aria-label="Langue">
-			<button
-				type="button"
-				class="lang__btn"
-				class:active={settings.lang === 'fr'}
-				onclick={() => updateSettings({ lang: 'fr' })}
-			>
-				<Globe size={14} strokeWidth={1.75} aria-hidden="true" />
-				FR
-			</button>
-			<button
-				type="button"
-				class="lang__btn"
-				class:active={settings.lang === 'en'}
-				onclick={() => updateSettings({ lang: 'en' })}
-			>
-				EN
-			</button>
-		</div>
-	</header>
+	<h1 class="sr-only">Pictiúr</h1>
+	<Header current="home" />
 
 	<main class="main">
 		<DropZone onFiles={handleFiles} />
@@ -316,8 +283,6 @@
 				{/if}
 			</section>
 		</div>
-
-		<Faq />
 	</main>
 </div>
 
@@ -334,70 +299,6 @@
 		min-height: 100vh;
 		display: flex;
 		flex-direction: column;
-	}
-
-	/* --- Sticky header --- */
-	.topbar {
-		position: sticky;
-		top: 0;
-		z-index: 50;
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: 16px;
-		padding: 14px 32px;
-		background: rgba(20, 20, 20, 0.85);
-		backdrop-filter: blur(12px);
-		border-bottom: 1px solid var(--border);
-	}
-	.brand {
-		display: flex;
-		align-items: center;
-		gap: 12px;
-		min-width: 0;
-	}
-	.brand__logo {
-		height: 30px;
-		width: auto;
-		flex: none;
-	}
-	.brand__badge {
-		flex: none;
-		font-size: 12px;
-		color: var(--text-3);
-		border: 1px solid var(--border-input);
-		border-radius: var(--r-pill);
-		padding: 3px 10px;
-		white-space: nowrap;
-	}
-	.lang {
-		display: flex;
-		flex: none;
-		background: var(--surface);
-		border: 1px solid var(--border-input);
-		border-radius: var(--r-pill);
-		padding: 3px;
-		gap: 2px;
-	}
-	.lang__btn {
-		display: inline-flex;
-		align-items: center;
-		gap: 5px;
-		font-size: 12px;
-		font-weight: 600;
-		padding: 5px 12px;
-		border-radius: var(--r-pill);
-		color: var(--text-3);
-		transition:
-			background-color var(--dur) var(--ease),
-			color var(--dur) var(--ease);
-	}
-	.lang__btn:hover:not(.active) {
-		color: var(--text);
-	}
-	.lang__btn.active {
-		background: var(--accent);
-		color: var(--accent-ink);
 	}
 
 	/* --- Content --- */
@@ -538,15 +439,9 @@
 		}
 	}
 	@media (max-width: 720px) {
-		.topbar {
-			padding: 12px 16px;
-		}
 		.main {
 			padding: 16px;
 			gap: 16px;
-		}
-		.brand__badge {
-			display: none;
 		}
 		.layout {
 			grid-template-columns: 1fr;
